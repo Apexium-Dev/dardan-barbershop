@@ -28,6 +28,7 @@ const heroStyles = `
     .hero-section {
       flex-direction: column;
       height: auto;
+      overflow: hidden;
     }
     .hero-content {
       padding: 48px 24px 32px;
@@ -38,7 +39,7 @@ const heroStyles = `
 
   @media (max-width: 480px) {
     .hero-content {
-      padding: 36px 20px 28px;
+      padding: 36px 20px 24px;
     }
   }
 
@@ -168,15 +169,16 @@ const heroStyles = `
     .hero-image-container {
       height: 320px;
       flex: none;
-      margin: 0 24px 48px;
+      margin: 0 24px 0;
+      border-radius: 24px 24px 0 0;
     }
   }
 
   @media (max-width: 480px) {
     .hero-image-container {
       height: 260px;
-      margin: 0 16px 40px;
-      border-radius: 20px;
+      margin: 0 16px 0;
+      border-radius: 20px 20px 0 0;
     }
   }
 
