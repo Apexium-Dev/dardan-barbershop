@@ -253,7 +253,7 @@ const navbarStyles = `
     top: 72px;
     left: 0;
     right: 0;
-    background-color: rgba(23, 26, 23, 0.95);
+    background-color: rgba(15, 15, 15, 0.98);
     border-bottom: 1px solid rgba(220, 208, 180, 0.1);
     padding: 20px 24px;
     flex-direction: column;
