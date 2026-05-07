@@ -18,97 +18,92 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     // ── Scene ──────────────────────────────────────────────────────────
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#0f0f0f");
-    scene.fog = new THREE.FogExp2("#0f0f0f", 0.18);
+
+    const isMobile = mount.clientWidth < 640;
 
     const camera = new THREE.PerspectiveCamera(
-      45,
+      isMobile ? 60 : 45,
       mount.clientWidth / mount.clientHeight,
       0.1,
-      100
+      100,
     );
-    camera.position.set(0, 0, 6);
+    camera.position.set(0, 0, isMobile ? 8 : 6);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
     mount.appendChild(renderer.domElement);
 
     // ── Materials ──────────────────────────────────────────────────────
-    const goldMat = new THREE.MeshStandardMaterial({ color: "#c9a961", roughness: 0.25, metalness: 0.85 });
-    const darkMat = new THREE.MeshStandardMaterial({ color: "#1a1a1a", roughness: 0.5, metalness: 0.4 });
-    const silverMat = new THREE.MeshStandardMaterial({ color: "#aaaaaa", roughness: 0.2, metalness: 0.95 });
-    const chromeMat = new THREE.MeshStandardMaterial({ color: "#cccccc", roughness: 0.1, metalness: 1.0 });
-
-    // ── Clipper Machine ────────────────────────────────────────────────
-    const clipperGroup = new THREE.Group();
-    clipperGroup.position.set(-1.4, 0, 0);
-
-    clipperGroup.add(new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.8, 0.55), darkMat));
-
-    [-0.4, 0, 0.4].forEach((y) => {
-      const ridge = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.055, 0.58), goldMat);
-      ridge.position.y = y;
-      clipperGroup.add(ridge);
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: "#e8c47a",
+      roughness: 0.15,
+      metalness: 0.9,
+      emissive: "#7a5a20",
+      emissiveIntensity: 0.25,
+    });
+    const silverMat = new THREE.MeshStandardMaterial({
+      color: "#e8e8e8",
+      roughness: 0.08,
+      metalness: 1.0,
+      emissive: "#444444",
+      emissiveIntensity: 0.15,
+    });
+    const chromeMat = new THREE.MeshStandardMaterial({
+      color: "#f0f0f0",
+      roughness: 0.05,
+      metalness: 1.0,
+      emissive: "#555555",
+      emissiveIntensity: 0.2,
     });
 
-    const taper = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.55, 0.4, 6), darkMat);
-    taper.position.y = 1.1;
-    clipperGroup.add(taper);
-
-    const bladeHouse = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.18, 0.52), chromeMat);
-    bladeHouse.position.y = 1.36;
-    clipperGroup.add(bladeHouse);
-
-    for (let i = 0; i < 5; i++) {
-      const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.28, 0.06), silverMat);
-      tooth.position.set(-0.24 + i * 0.12, 1.58, 0);
-      clipperGroup.add(tooth);
-    }
-
-    const movingBlade = new THREE.Group();
-    for (let i = 0; i < 4; i++) {
-      const mTooth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.05), goldMat);
-      mTooth.position.set(-0.18 + i * 0.12, 1.52, 0);
-      movingBlade.add(mTooth);
-    }
-    clipperGroup.add(movingBlade);
-
-    const switchMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.08, 16), goldMat);
-    switchMesh.rotation.z = Math.PI / 2;
-    switchMesh.position.set(0.62, 0.3, 0);
-    clipperGroup.add(switchMesh);
-
-    const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3, 12), darkMat);
-    cord.position.y = -1.05;
-    clipperGroup.add(cord);
-    scene.add(clipperGroup);
-
-    // ── Scissors ──────────────────────────────────────────────────────
+    // ── Scissors (centred) ─────────────────────────────────────────────
     const scissorsGroup = new THREE.Group();
-    scissorsGroup.position.set(1.5, 0, 0);
+    scissorsGroup.position.set(0, 0, 0);
     scissorsGroup.rotation.z = -Math.PI / 6;
+    // Scale down slightly on mobile so handles fit in view
+    const s = isMobile ? 0.72 : 1;
+    scissorsGroup.scale.set(s, s, s);
 
     const makeBlade = (flip: number) => {
       const g = new THREE.Group();
-      const bl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.2, 0.06), chromeMat);
-      bl.position.y = 0.9;
+      // Blade — wider and thicker for visibility
+      const bl = new THREE.Mesh(
+        new THREE.BoxGeometry(0.14, 2.4, 0.1),
+        chromeMat,
+      );
+      bl.position.y = 1.0;
       g.add(bl);
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.35, 8), silverMat);
-      tip.position.y = 2.08;
+      // Sharp tip
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(0.07, 0.42, 8),
+        silverMat,
+      );
+      tip.position.y = 2.31;
       g.add(tip);
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.055, 16, 32), goldMat);
-      ring.position.set(flip * 0.12, -0.85, 0);
+      // Finger ring — bigger torus
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.34, 0.07, 16, 48),
+        goldMat,
+      );
+      ring.position.set(flip * 0.14, -0.95, 0);
       g.add(ring);
-      const shank = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.06), goldMat);
-      shank.position.set(flip * 0.06, -0.45, 0);
+      // Shank connecting ring to pivot
+      const shank = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.8, 0.08),
+        goldMat,
+      );
+      shank.position.set(flip * 0.07, -0.5, 0);
       g.add(shank);
       return g;
     };
 
     const bladeA = makeBlade(-1);
     const bladeB = makeBlade(1);
-    const pivotMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.1, 16), goldMat);
+    const pivotMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.13, 0.13, 0.14, 24),
+      goldMat,
+    );
     pivotMesh.rotation.x = Math.PI / 2;
     scissorsGroup.add(bladeA, bladeB, pivotMesh);
     scene.add(scissorsGroup);
@@ -117,27 +112,40 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     const pCount = 80;
     const pPos = new Float32Array(pCount * 3);
     for (let i = 0; i < pCount; i++) {
-      pPos[i * 3]     = (Math.random() - 0.5) * 10;
+      pPos[i * 3] = (Math.random() - 0.5) * 10;
       pPos[i * 3 + 1] = (Math.random() - 0.5) * 8;
       pPos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 2;
     }
     const pGeo = new THREE.BufferGeometry();
     pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
-    const pMat = new THREE.PointsMaterial({ color: "#c9a961", size: 0.035, transparent: true, opacity: 0.45 });
+    const pMat = new THREE.PointsMaterial({
+      color: "#c9a961",
+      size: 0.035,
+      transparent: true,
+      opacity: 0.45,
+    });
     const dustPoints = new THREE.Points(pGeo, pMat);
     scene.add(dustPoints);
 
     // ── Lighting ───────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const keyLight = new THREE.PointLight("#dcd0b4", 50, 14);
-    keyLight.position.set(4, 5, 5);
+    // Strong ambient so no part falls into pure black
+    scene.add(new THREE.AmbientLight(0xffffff, 1.6));
+    // Bright warm key from front-top-right
+    const keyLight = new THREE.PointLight(0xffffff, 120, 20);
+    keyLight.position.set(3, 4, 6);
     scene.add(keyLight);
-    const fillLight = new THREE.PointLight("#c9a961", 25, 10);
-    fillLight.position.set(-4, -2, 3);
+    // Gold fill from left
+    const fillLight = new THREE.PointLight("#e8c47a", 80, 16);
+    fillLight.position.set(-4, 0, 4);
     scene.add(fillLight);
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    rimLight.position.set(-2, 3, -2);
+    // White rim / back-light to separate from bg
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    rimLight.position.set(-1, 2, -3);
     scene.add(rimLight);
+    // Front-facing fill so details on blades stay bright
+    const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    frontLight.position.set(0, 0, 8);
+    scene.add(frontLight);
 
     // ── Fast progress (1.6 s) ──────────────────────────────────────────
     let prog = 0;
@@ -159,16 +167,13 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       raf = requestAnimationFrame(animate);
       t += 0.018;
 
-      // Clipper float + blade buzz
-      clipperGroup.position.y = Math.sin(t * 1.2) * 0.12;
-      clipperGroup.rotation.z = Math.sin(t * 0.8) * 0.04;
-      movingBlade.position.x = Math.sin(t * 28) * 0.055;
-
-      // Scissors open/close + float opposite phase
-      const openAngle = (Math.sin(t * 2.5) * 0.5 + 0.5) * 0.45;
+      // Scissors open/close + gentle float
+      const openAngle = (Math.sin(t * 2.5) * 0.5 + 0.5) * 0.55;
       bladeA.rotation.z = openAngle;
       bladeB.rotation.z = -openAngle;
-      scissorsGroup.position.y = Math.sin(t * 1.2 + Math.PI) * 0.12;
+      scissorsGroup.position.y = Math.sin(t * 1.0) * 0.1;
+      // Very slow y-axis rotation so you see the 3D shape
+      scissorsGroup.rotation.y = Math.sin(t * 0.4) * 0.3;
 
       dustPoints.rotation.y += 0.003;
       dustPoints.rotation.x += 0.001;
@@ -179,9 +184,13 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     // ── Resize ─────────────────────────────────────────────────────────
     const onResize = () => {
       if (!mount) return;
+      const mobile = mount.clientWidth < 640;
+      camera.fov = mobile ? 60 : 45;
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
+      const ns = mobile ? 0.72 : 1;
+      scissorsGroup.scale.set(ns, ns, ns);
     };
     window.addEventListener("resize", onResize);
 
@@ -190,9 +199,10 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       clearInterval(progInterval);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
-      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
+      if (mount.contains(renderer.domElement))
+        mount.removeChild(renderer.domElement);
       renderer.dispose();
-      [goldMat, darkMat, silverMat, chromeMat, pMat].forEach((m) => m.dispose());
+      [goldMat, silverMat, chromeMat, pMat].forEach((m) => m.dispose());
       pGeo.dispose();
     };
   }, [onComplete]);
@@ -222,7 +232,8 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
           flexDirection: "column",
           alignItems: "center",
           gap: 12,
-          background: "linear-gradient(to top, rgba(15,15,15,0.92) 0%, transparent 100%)",
+          background:
+            "linear-gradient(to top, rgba(15,15,15,0.92) 0%, transparent 100%)",
         }}
       >
         {/* Wordmark */}
@@ -244,7 +255,8 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
           style={{
             width: 48,
             height: 1,
-            background: "linear-gradient(to right, transparent, #c9a961, transparent)",
+            background:
+              "linear-gradient(to right, transparent, #c9a961, transparent)",
           }}
         />
 
@@ -262,7 +274,8 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
             style={{
               height: "100%",
               width: `${progress}%`,
-              background: "linear-gradient(to right, #8a6f3a, #c9a961, #dcd0b4)",
+              background:
+                "linear-gradient(to right, #8a6f3a, #c9a961, #dcd0b4)",
               transition: "width 0.1s linear",
             }}
           />
