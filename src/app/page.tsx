@@ -2,7 +2,6 @@
 
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { Legacy } from "@/components/Legacy";
 import { Catalogue } from "@/components/Catalogue";
 
 export default function Home() {
@@ -35,7 +34,6 @@ export default function Home() {
         startBooking={() => {}}
         setView={() => {}}
       />
-      <Legacy />
       <Catalogue startBooking={() => {}} />
     </main>
   );
