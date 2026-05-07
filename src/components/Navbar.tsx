@@ -507,13 +507,6 @@ export const Navbar = ({
             >
               {t.theCraftsmen}
             </a>
-            <a
-              href="#info"
-              className="navbar-mobile-link"
-              onClick={() => setMenuOpen(false)}
-            >
-              {t.location}
-            </a>
           </div>
 
           <div className="navbar-mobile-auth">
@@ -549,6 +542,16 @@ export const Navbar = ({
             >
               {t.bookNow}
             </button>
+          </div>
+
+          <div className="navbar-mobile-links">
+            <a
+              href="#info"
+              className="navbar-mobile-link"
+              onClick={() => setMenuOpen(false)}
+            >
+              {t.location}
+            </a>
           </div>
         </div>
       </nav>
