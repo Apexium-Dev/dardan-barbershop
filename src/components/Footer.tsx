@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 const footerStyles = `
   .footer {
@@ -24,23 +25,9 @@ const footerStyles = `
   }
 
   /* Brand column */
-  .footer-brand-name {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 28px;
-    font-weight: 400;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    margin: 0 0 8px 0;
-    line-height: 1.1;
-  }
-
-  .footer-brand-sub {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.45em;
-    color: rgba(255, 255, 255, 0.25);
-    font-weight: 700;
-    margin: 0 0 28px 0;
+  .footer-logo {
+    margin-bottom: 20px;
+    opacity: 0.9;
     display: block;
   }
 
@@ -50,7 +37,37 @@ const footerStyles = `
     color: rgba(255, 255, 255, 0.35);
     font-weight: 300;
     max-width: 280px;
-    margin: 0;
+    margin: 0 0 24px 0;
+  }
+
+  /* Social icons */
+  .footer-socials {
+    display: flex;
+    gap: 12px;
+  }
+
+  .footer-social-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+    transition: all 200ms ease;
+  }
+
+  .footer-social-btn:hover {
+    border-color: #c9a961;
+    color: #c9a961;
+    transform: translateY(-2px);
+  }
+
+  .footer-social-btn svg {
+    width: 15px;
+    height: 15px;
   }
 
   /* Column headings */
@@ -153,11 +170,46 @@ const footerStyles = `
     color: rgba(201, 169, 97, 0.5);
   }
 
+  .footer-bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom-link {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.18);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: color 200ms ease;
+  }
+
+  .footer-bottom-link:hover {
+    color: rgba(201, 169, 97, 0.7);
+  }
+
+  .footer-bottom-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: inline-block;
+  }
+
   .footer-made {
     font-size: 10px;
     color: rgba(255, 255, 255, 0.12);
     letter-spacing: 0.05em;
     margin: 0;
+    text-decoration: none;
+    transition: color 200ms ease;
+    display: inline-block;
+  }
+
+  .footer-made:hover {
+    color: rgba(201, 169, 97, 0.5);
   }
 
   /* Responsive */
@@ -185,7 +237,7 @@ const footerStyles = `
     .footer-bottom {
       flex-direction: column;
       align-items: flex-start;
-      gap: 8px;
+      gap: 12px;
     }
   }
 `;
@@ -199,12 +251,46 @@ export const Footer = () => (
 
           {/* Brand */}
           <div>
-            <h2 className="footer-brand-name">Dardan</h2>
-            <span className="footer-brand-sub">Barbershop</span>
+            <Image
+              src="/logo.png"
+              alt="Dardan Barbershop"
+              width={100}
+              height={100}
+              className="footer-logo"
+              style={{ height: "auto", width: "auto" }}
+            />
             <p className="footer-tagline">
               Precision craftsmanship rooted in tradition.
               Every cut tells a story of nearly two decades of mastery.
             </p>
+            <div className="footer-socials">
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/dardanbarbershop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-social-btn"
+                aria-label="Instagram"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+              </a>
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/dardanbarbershop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-social-btn"
+                aria-label="Facebook"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Location */}
@@ -242,7 +328,20 @@ export const Footer = () => (
           <p className="footer-copy">
             © 2026 <span>Dardan Barbershop</span>. All rights reserved.
           </p>
-          <p className="footer-made">Crafted by Apexium</p>
+          <div className="footer-bottom-links">
+            <a href="/privacy" className="footer-bottom-link">Privacy Policy</a>
+            <span className="footer-bottom-dot" />
+            <a href="/terms" className="footer-bottom-link">Terms of Service</a>
+            <span className="footer-bottom-dot" />
+            <a
+              href="https://www.instagram.com/apexiumdev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-made"
+            >
+              Crafted by Apexium Dev
+            </a>
+          </div>
         </div>
       </div>
     </footer>
