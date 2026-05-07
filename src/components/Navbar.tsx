@@ -322,8 +322,11 @@ const navbarStyles = `
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-top: 16px;
+    padding: 16px 0;
     border-top: 1px solid rgba(220, 208, 180, 0.1);
+    border-bottom: 1px solid rgba(220, 208, 180, 0.1);
+    align-items: center;
+    justify-content: center;
   }
 
   .navbar-mobile-login-btn {
@@ -507,6 +510,13 @@ export const Navbar = ({
             >
               {t.theCraftsmen}
             </a>
+            <a
+              href="#info"
+              className="navbar-mobile-link"
+              onClick={() => setMenuOpen(false)}
+            >
+              {t.location}
+            </a>
           </div>
 
           <div className="navbar-mobile-auth">
@@ -542,16 +552,6 @@ export const Navbar = ({
             >
               {t.bookNow}
             </button>
-          </div>
-
-          <div className="navbar-mobile-links">
-            <a
-              href="#info"
-              className="navbar-mobile-link"
-              onClick={() => setMenuOpen(false)}
-            >
-              {t.location}
-            </a>
           </div>
         </div>
       </nav>
