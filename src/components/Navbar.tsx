@@ -395,7 +395,10 @@ export const Navbar = ({
       <nav className="navbar">
         <div className="navbar-container">
           <div className="navbar-left">
-            <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="navbar-logo">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="navbar-logo"
+            >
               <Image
                 src="/logo.png"
                 alt="Dardan Barbershop"
