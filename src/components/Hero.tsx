@@ -21,7 +21,7 @@ const heroStyles = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 48px 64px;
+    padding: 32px 56px;
   }
 
   @media (max-width: 1024px) {
@@ -48,7 +48,7 @@ const heroStyles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
   }
 
   .hero-badge-line {
@@ -68,10 +68,10 @@ const heroStyles = `
 
   /* Main title */
   .hero-title {
-    font-size: clamp(40px, 5.5vw, 80px);
+    font-size: clamp(36px, 4.8vw, 72px);
     line-height: 0.9;
     font-family: Georgia, serif;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     letter-spacing: -0.02em;
     color: #ffffff;
   }
@@ -160,7 +160,7 @@ const heroStyles = `
     flex: 1;
     position: relative;
     overflow: hidden;
-    margin: 32px 48px 32px 0;
+    margin: 24px 40px 24px 0;
     border-radius: 32px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
   }
