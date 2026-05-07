@@ -66,13 +66,13 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       emissiveIntensity: 0.25,
     });
 
-    // Dark polished steel for the blades
+    // Bright polished silver for the blades
     const steelOverride = new THREE.MeshStandardMaterial({
-      color: "#3a3d42",
-      roughness: 0.08,
-      metalness: 0.97,
-      emissive: "#1a1c20",
-      emissiveIntensity: 0.1,
+      color: "#d0cfc8",
+      roughness: 0.06,
+      metalness: 0.98,
+      emissive: "#2a2820",
+      emissiveIntensity: 0.05,
     });
 
     // ── Dust particles ─────────────────────────────────────────────────
