@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { User, Scan, Menu, X } from "lucide-react";
 import { Language } from "../translations";
 import { User as FirebaseUser } from "firebase/auth";
@@ -42,16 +43,16 @@ const navbarStyles = `
 
   /* Logo */
   .navbar-logo {
-    font-size: 28px;
-    font-family: Georgia, serif;
-    font-style: italic;
-    color: #c9a961;
-    letter-spacing: -0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
     transition: opacity 200ms ease;
     padding: 0;
+    height: 40px;
+    width: auto;
   }
 
   .navbar-logo:hover {
@@ -344,7 +345,13 @@ export const Navbar = ({
         <div className="navbar-container">
           <div className="navbar-left">
             <button onClick={() => setView("home")} className="navbar-logo">
-              BD
+              <Image
+                src="/logo.png"
+                alt="Dardan Barbershop"
+                width={40}
+                height={40}
+                style={{ height: "auto", width: "auto" }}
+              />
             </button>
 
             <div className="navbar-menu">
