@@ -282,6 +282,9 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
           src="/photo1.png"
           alt="Barbershop Atmosphere"
           fill
+          priority
+          loading="eager"
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="hero-image"
           style={{ objectFit: "cover" }}
         />
