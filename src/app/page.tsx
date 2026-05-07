@@ -1,15 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Catalogue } from "@/components/Catalogue";
 import { Craftsmen } from "@/components/Craftsmen";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function Home() {
+  const [loaded, setLoaded] = useState(false);
+
   return (
-    <main style={{ backgroundColor: "#0f0f0f", color: "#ffffff" }}>
+    <>
+      {!loaded && <LoadingScreen onComplete={() => setLoaded(true)} />}
+    <main style={{ backgroundColor: "#0f0f0f", color: "#ffffff", opacity: loaded ? 1 : 0, transition: "opacity 0.6s ease" }}>
       <Navbar
         lang="en"
         setLang={() => {}}
@@ -42,5 +48,6 @@ export default function Home() {
       <Footer />
       <ScrollToTop />
     </main>
+    </>
   );
 }
