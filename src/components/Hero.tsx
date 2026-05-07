@@ -279,7 +279,7 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
 
       <div className="hero-image-container">
         <Image
-          src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1200"
+          src="/photo1.png"
           alt="Barbershop Atmosphere"
           fill
           className="hero-image"
