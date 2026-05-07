@@ -250,7 +250,6 @@ export const Footer = () => (
     <footer id="info" className="footer">
       <div className="footer-inner">
         <div className="footer-top">
-
           {/* Brand */}
           <div>
             <Image
@@ -262,8 +261,8 @@ export const Footer = () => (
               style={{ height: "auto", width: "auto" }}
             />
             <p className="footer-tagline">
-              Precision craftsmanship rooted in tradition.
-              Every cut tells a story of nearly two decades of mastery.
+              Precision craftsmanship rooted in tradition. Every cut tells a
+              story of nearly two decades of mastery.
             </p>
             <div className="footer-socials">
               {/* Instagram */}
@@ -274,10 +273,23 @@ export const Footer = () => (
                 className="footer-social-btn"
                 aria-label="Instagram"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                  <circle cx="12" cy="12" r="4"/>
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle
+                    cx="17.5"
+                    cy="6.5"
+                    r="0.5"
+                    fill="currentColor"
+                    stroke="none"
+                  />
                 </svg>
               </a>
               {/* Facebook */}
@@ -289,7 +301,7 @@ export const Footer = () => (
                 aria-label="Facebook"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
             </div>
@@ -299,7 +311,8 @@ export const Footer = () => (
           <div>
             <p className="footer-col-label">Location</p>
             <p className="footer-address">
-              20m near General Hospital<br />
+              20m near General Hospital
+              <br />
               Dibër, Macedonia
             </p>
             <a href="tel:+38970000000" className="footer-phone">
@@ -323,7 +336,6 @@ export const Footer = () => (
               <span className="footer-hours-time closed">Closed</span>
             </div>
           </div>
-
         </div>
 
         <div className="footer-bottom">
@@ -331,9 +343,13 @@ export const Footer = () => (
             © 2026 <span>Dardan Barbershop</span>. All rights reserved.
           </p>
           <div className="footer-bottom-links">
-            <a href="/privacy" className="footer-bottom-link">Privacy Policy</a>
+            <a href="/privacy" className="footer-bottom-link">
+              Privacy Policy
+            </a>
             <span className="footer-bottom-dot" />
-            <a href="/terms" className="footer-bottom-link">Terms of Service</a>
+            <a href="/terms" className="footer-bottom-link">
+              Terms of Service
+            </a>
             <span className="footer-bottom-dot" />
             <a
               href="https://www.instagram.com/apexiumdev/"
