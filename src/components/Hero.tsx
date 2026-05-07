@@ -10,9 +10,9 @@ import Image from "next/image";
 const heroStyles = `
   /* Hero Section Container */
   .hero-section {
-    min-height: 600px;
-    padding-top: 120px;
-    padding-bottom: 60px;
+    min-height: auto;
+    padding-top: 80px;
+    padding-bottom: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -22,16 +22,17 @@ const heroStyles = `
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 700px;
       padding-left: 48px;
       padding-right: 48px;
-      padding-top: 80px;
+      padding-top: 60px;
+      padding-bottom: 40px;
     }
   }
 
   @media (min-width: 1024px) {
     .hero-section {
-      min-height: 800px;
+      padding-top: 60px;
+      padding-bottom: 40px;
     }
   }
 
@@ -42,7 +43,7 @@ const heroStyles = `
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 24px;
     align-items: center;
     justify-items: center;
   }
@@ -50,6 +51,7 @@ const heroStyles = `
   @media (min-width: 1024px) {
     .hero-container {
       grid-template-columns: 1fr 1fr;
+      gap: 24px;
       align-items: center;
       justify-items: start;
     }
@@ -66,7 +68,7 @@ const heroStyles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
   }
 
   .hero-badge-line {
@@ -89,7 +91,7 @@ const heroStyles = `
     font-size: clamp(28px, 8vw, 56px);
     line-height: 0.85;
     font-family: Georgia, serif;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     letter-spacing: -0.02em;
     color: #ffffff;
   }
