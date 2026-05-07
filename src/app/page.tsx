@@ -3,6 +3,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Catalogue } from "@/components/Catalogue";
+import { Craftsmen } from "@/components/Craftsmen";
 
 export default function Home() {
   return (
@@ -35,6 +36,7 @@ export default function Home() {
         setView={() => {}}
       />
       <Catalogue startBooking={() => {}} />
+      <Craftsmen />
     </main>
   );
 }
