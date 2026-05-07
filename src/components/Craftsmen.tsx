@@ -27,28 +27,58 @@ const team = [
 
 const craftsmenStyles = `
   .craftsmen-section {
-    padding: 120px 24px;
+    padding: 120px 48px;
     background-color: #0f0f0f;
+    max-width: 90rem;
+    margin: 0 auto;
   }
 
+  /* Header */
   .craftsmen-header {
-    text-align: center;
-    margin-bottom: 96px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .craftsmen-eyebrow-line {
+    width: 40px;
+    height: 1px;
+    background-color: #c9a961;
+    flex-shrink: 0;
+  }
+
+  .craftsmen-eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: #c9a961;
+    font-weight: 700;
   }
 
   .craftsmen-title {
     font-family: Georgia, 'Times New Roman', serif;
-    font-style: italic;
-    font-size: clamp(48px, 8vw, 112px);
+    font-size: clamp(48px, 6vw, 88px);
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.12);
-    margin: 0;
     line-height: 1;
+    color: #ffffff;
+    margin: 0 0 8px 0;
   }
 
+  .craftsmen-title em {
+    font-style: italic;
+    color: #c9a961;
+  }
+
+  .craftsmen-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 32px 0 64px 0;
+  }
+
+  /* Grid */
   .craftsmen-grid {
-    max-width: 72rem;
-    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 48px;
@@ -63,19 +93,16 @@ const craftsmenStyles = `
   .craftsmen-image-wrapper {
     position: relative;
     aspect-ratio: 3/4;
-    margin-bottom: 28px;
-    border-radius: 28px;
+    margin-bottom: 24px;
+    border-radius: 20px;
     overflow: hidden;
     background-color: #1a1a1a;
   }
 
   .craftsmen-image {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
     filter: grayscale(100%);
     transition: filter 1000ms ease, transform 1000ms ease;
-    display: block;
   }
 
   .craftsmen-image-wrapper:hover .craftsmen-image {
@@ -86,7 +113,7 @@ const craftsmenStyles = `
   .craftsmen-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(201, 169, 97, 0.08);
+    background: rgba(201, 169, 97, 0.06);
     opacity: 0;
     transition: opacity 600ms ease;
     pointer-events: none;
@@ -114,6 +141,11 @@ const craftsmenStyles = `
     font-weight: 400;
     color: #ffffff;
     margin: 0 0 6px 0;
+    transition: transform 300ms ease;
+  }
+
+  .craftsmen-card:hover .craftsmen-name {
+    transform: translateX(4px);
   }
 
   .craftsmen-role {
@@ -122,42 +154,41 @@ const craftsmenStyles = `
     letter-spacing: 0.3em;
     color: #c9a961;
     font-weight: 700;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .craftsmen-bio {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.75;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.38);
     font-weight: 300;
     margin: 0;
   }
 
   /* Responsive */
   @media (max-width: 1024px) {
-    .craftsmen-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 40px;
+    .craftsmen-section {
+      padding: 80px 32px;
     }
 
-    .craftsmen-section {
-      padding: 80px 24px;
+    .craftsmen-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 36px;
     }
   }
 
   @media (max-width: 640px) {
-    .craftsmen-grid {
-      grid-template-columns: 1fr;
-      gap: 48px;
-      max-width: 420px;
-    }
-
     .craftsmen-section {
       padding: 64px 20px;
     }
 
-    .craftsmen-header {
-      margin-bottom: 64px;
+    .craftsmen-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .craftsmen-divider {
+      margin: 24px 0 48px 0;
     }
   }
 `;
@@ -166,10 +197,18 @@ export const Craftsmen = () => (
   <>
     <style>{craftsmenStyles}</style>
     <section id="barbers" className="craftsmen-section">
-      <div className="craftsmen-header">
-        <h2 className="craftsmen-title">The Craftsmen</h2>
-      </div>
 
+      {/* Header */}
+      <div className="craftsmen-header">
+        <div className="craftsmen-eyebrow-line" />
+        <span className="craftsmen-eyebrow">The Team</span>
+      </div>
+      <h2 className="craftsmen-title">
+        The <em>Craftsmen.</em>
+      </h2>
+      <div className="craftsmen-divider" />
+
+      {/* Grid */}
       <div className="craftsmen-grid">
         {team.map((member, i) => (
           <motion.div
@@ -177,7 +216,7 @@ export const Craftsmen = () => (
             className="craftsmen-card"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7, delay: i * 0.15, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <div className="craftsmen-image-wrapper">
@@ -187,7 +226,6 @@ export const Craftsmen = () => (
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="craftsmen-image"
-                style={{ objectFit: "cover" }}
               />
               <div className="craftsmen-overlay" />
               <span className="craftsmen-number">0{i + 1}</span>
@@ -199,6 +237,7 @@ export const Craftsmen = () => (
           </motion.div>
         ))}
       </div>
+
     </section>
   </>
 );
