@@ -57,20 +57,29 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     frontLight.position.set(0, 0, 8);
     scene.add(frontLight);
 
-    // ── Gold material override for handles ─────────────────────────────
+    // ── Material overrides ─────────────────────────────────────────────
     const goldOverride = new THREE.MeshStandardMaterial({
       color: "#c9a961",
       roughness: 0.18,
-      metalness: 0.92,
+      metalness: 0.95,
       emissive: "#7a5a20",
-      emissiveIntensity: 0.2,
+      emissiveIntensity: 0.25,
+    });
+
+    // Dark polished steel for the blades
+    const steelOverride = new THREE.MeshStandardMaterial({
+      color: "#3a3d42",
+      roughness: 0.08,
+      metalness: 0.97,
+      emissive: "#1a1c20",
+      emissiveIntensity: 0.1,
     });
 
     // ── Dust particles ─────────────────────────────────────────────────
     const pCount = 90;
     const pPos = new Float32Array(pCount * 3);
     for (let i = 0; i < pCount; i++) {
-      pPos[i * 3]     = (Math.random() - 0.5) * 10;
+      pPos[i * 3] = (Math.random() - 0.5) * 10;
       pPos[i * 3 + 1] = (Math.random() - 0.5) * 8;
       pPos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 2;
     }
@@ -129,7 +138,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         model.scale.setScalar(scale);
         model.position.sub(center.multiplyScalar(scale));
 
-        // Apply gold tint to handle/padding nodes
+        // Material overrides per node type
         model.traverse((child) => {
           if (!(child instanceof THREE.Mesh)) return;
           const name = child.name.toLowerCase();
@@ -140,6 +149,8 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
             name.includes("damper")
           ) {
             child.material = goldOverride;
+          } else if (name.includes("blade") || name.includes("object")) {
+            child.material = steelOverride;
           }
         });
 
@@ -192,6 +203,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         mount.removeChild(renderer.domElement);
       renderer.dispose();
       goldOverride.dispose();
+      steelOverride.dispose();
       pGeo.dispose();
       pMat.dispose();
     };
