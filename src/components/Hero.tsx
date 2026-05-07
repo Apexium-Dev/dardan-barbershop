@@ -32,7 +32,15 @@ const heroStyles = `
       height: auto;
     }
     .hero-content {
-      padding: 60px 32px 40px;
+      padding: 48px 24px 32px;
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-content {
+      padding: 36px 20px 28px;
     }
   }
 
@@ -69,6 +77,20 @@ const heroStyles = `
     color: #ffffff;
   }
 
+  @media (max-width: 1024px) {
+    .hero-title {
+      font-size: clamp(36px, 10vw, 60px);
+      margin-bottom: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: clamp(32px, 11vw, 48px);
+      margin-bottom: 24px;
+    }
+  }
+
   .hero-title-highlight {
     color: #c9a961;
     font-style: italic;
@@ -79,6 +101,15 @@ const heroStyles = `
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+  }
+
+  @media (max-width: 1024px) {
+    .hero-badge {
+      justify-content: center;
+    }
+    .hero-buttons {
+      justify-content: center;
+    }
   }
 
   /* Book Now Button */
@@ -137,9 +168,17 @@ const heroStyles = `
 
   @media (max-width: 1024px) {
     .hero-image-container {
-      height: 360px;
+      height: 320px;
       flex: none;
-      margin: 0 24px 40px;
+      margin: 0 24px 48px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-image-container {
+      height: 260px;
+      margin: 0 16px 40px;
+      border-radius: 20px;
     }
   }
 
@@ -175,6 +214,24 @@ const heroStyles = `
     font-style: italic;
     color: #dcd0b4;
     line-height: 1.6;
+  }
+
+  @media (max-width: 1024px) {
+    .hero-quote {
+      font-size: 14px;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-quote {
+      font-size: 12px;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+    }
   }
 
   .hero-quote-highlight {
