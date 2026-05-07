@@ -20,7 +20,6 @@ export default function Home() {
         lang="en"
         setLang={() => {}}
         setView={() => {}}
-        setAuthMode={() => {}}
         user={null}
         userData={null}
         t={{

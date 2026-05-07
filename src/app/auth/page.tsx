@@ -17,22 +17,46 @@ export default function AuthPage() {
       <div style={styles.grain} />
 
       {/* ── Gold accent blobs ── */}
-      <div style={{ ...styles.blob, top: "-18%", left: "-12%", width: 520, height: 520 }} />
-      <div style={{ ...styles.blob, bottom: "-20%", right: "-10%", width: 420, height: 420, opacity: 0.06 }} />
+      <div
+        style={{
+          ...styles.blob,
+          top: "-18%",
+          left: "-12%",
+          width: 520,
+          height: 520,
+        }}
+      />
+      <div
+        style={{
+          ...styles.blob,
+          bottom: "-20%",
+          right: "-10%",
+          width: 420,
+          height: 420,
+          opacity: 0.06,
+        }}
+      />
 
       {/* ── Card ── */}
       <div style={styles.card}>
-
         {/* Logo */}
         <Link href="/" style={styles.logoWrap}>
-          <Image src="/logo.png" alt="Dardan Barbershop" width={54} height={54} style={{ objectFit: "contain" }} />
+          <Image
+            src="/logo.png"
+            alt="Dardan Barbershop"
+            width={54}
+            height={54}
+            style={{ objectFit: "contain" }}
+          />
         </Link>
 
         {/* ══════════════════════════════════════════════════════ LOGIN */}
         {view === "login" && (
           <div style={styles.form}>
             <p style={styles.eyebrow}>Welcome Back</p>
-            <h1 style={styles.title}>Sign <em>In</em></h1>
+            <h1 style={styles.title}>
+              Sign <em>In</em>
+            </h1>
             <div style={styles.divider} />
 
             <label style={styles.label}>Email</label>
@@ -40,8 +64,10 @@ export default function AuthPage() {
               type="email"
               placeholder="your@email.com"
               style={styles.input}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+              }
             />
 
             <label style={{ ...styles.label, marginTop: 18 }}>Password</label>
@@ -50,10 +76,16 @@ export default function AuthPage() {
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-                onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+                }
               />
-              <button style={styles.eyeBtn} onClick={() => setShowPass(p => !p)} type="button">
+              <button
+                style={styles.eyeBtn}
+                onClick={() => setShowPass((p) => !p)}
+                type="button"
+              >
                 {showPass ? <EyeOff /> : <EyeOn />}
               </button>
             </div>
@@ -66,11 +98,17 @@ export default function AuthPage() {
               Forgot password?
             </button>
 
-            <button style={styles.primary} type="button">Sign In</button>
+            <button style={styles.primary} type="button">
+              Sign In
+            </button>
 
             <p style={styles.switchText}>
               Don&apos;t have an account?{" "}
-              <button style={styles.switchLink} onClick={() => setView("register")} type="button">
+              <button
+                style={styles.switchLink}
+                onClick={() => setView("register")}
+                type="button"
+              >
                 Create one
               </button>
             </p>
@@ -81,7 +119,9 @@ export default function AuthPage() {
         {view === "register" && (
           <div style={styles.form}>
             <p style={styles.eyebrow}>Join the Club</p>
-            <h1 style={styles.title}>Create <em>Account</em></h1>
+            <h1 style={styles.title}>
+              Create <em>Account</em>
+            </h1>
             <div style={styles.divider} />
 
             <div style={styles.row}>
@@ -91,8 +131,13 @@ export default function AuthPage() {
                   type="text"
                   placeholder="Dardan"
                   style={{ ...styles.input, marginBottom: 0 }}
-                  onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.borderColor = "#c9a961")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.1)")
+                  }
                 />
               </div>
               <div style={{ flex: 1 }}>
@@ -101,8 +146,13 @@ export default function AuthPage() {
                   type="text"
                   placeholder="Alimi"
                   style={{ ...styles.input, marginBottom: 0 }}
-                  onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                  onFocus={(e) =>
+                    (e.currentTarget.style.borderColor = "#c9a961")
+                  }
+                  onBlur={(e) =>
+                    (e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.1)")
+                  }
                 />
               </div>
             </div>
@@ -112,8 +162,10 @@ export default function AuthPage() {
               type="tel"
               placeholder="+389 70 000 000"
               style={styles.input}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+              }
             />
 
             <label style={{ ...styles.label, marginTop: 18 }}>Email</label>
@@ -121,8 +173,10 @@ export default function AuthPage() {
               type="email"
               placeholder="your@email.com"
               style={styles.input}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+              }
             />
 
             <label style={{ ...styles.label, marginTop: 18 }}>Password</label>
@@ -131,40 +185,65 @@ export default function AuthPage() {
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-                onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+                }
               />
-              <button style={styles.eyeBtn} onClick={() => setShowPass(p => !p)} type="button">
+              <button
+                style={styles.eyeBtn}
+                onClick={() => setShowPass((p) => !p)}
+                type="button"
+              >
                 {showPass ? <EyeOff /> : <EyeOn />}
               </button>
             </div>
 
-            <label style={{ ...styles.label, marginTop: 18 }}>Confirm Password</label>
+            <label style={{ ...styles.label, marginTop: 18 }}>
+              Confirm Password
+            </label>
             <div style={styles.passWrap}>
               <input
                 type={showConfirm ? "text" : "password"}
                 placeholder="••••••••"
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-                onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+                }
               />
-              <button style={styles.eyeBtn} onClick={() => setShowConfirm(p => !p)} type="button">
+              <button
+                style={styles.eyeBtn}
+                onClick={() => setShowConfirm((p) => !p)}
+                type="button"
+              >
                 {showConfirm ? <EyeOff /> : <EyeOn />}
               </button>
             </div>
 
             <p style={styles.terms}>
               By creating an account you agree to our{" "}
-              <Link href="/terms" style={styles.termsLink}>Terms of Service</Link>{" "}
+              <Link href="/terms" style={styles.termsLink}>
+                Terms of Service
+              </Link>{" "}
               and{" "}
-              <Link href="/privacy" style={styles.termsLink}>Privacy Policy</Link>.
+              <Link href="/privacy" style={styles.termsLink}>
+                Privacy Policy
+              </Link>
+              .
             </p>
 
-            <button style={styles.primary} type="button">Create Account</button>
+            <button style={styles.primary} type="button">
+              Create Account
+            </button>
 
             <p style={styles.switchText}>
               Already have an account?{" "}
-              <button style={styles.switchLink} onClick={() => setView("login")} type="button">
+              <button
+                style={styles.switchLink}
+                onClick={() => setView("login")}
+                type="button"
+              >
                 Sign in
               </button>
             </p>
@@ -175,11 +254,14 @@ export default function AuthPage() {
         {view === "forgot" && (
           <div style={styles.form}>
             <p style={styles.eyebrow}>No Worries</p>
-            <h1 style={styles.title}>Reset <em>Password</em></h1>
+            <h1 style={styles.title}>
+              Reset <em>Password</em>
+            </h1>
             <div style={styles.divider} />
 
             <p style={styles.hint}>
-              Enter the email address linked to your account and we&apos;ll send you a reset link.
+              Enter the email address linked to your account and we&apos;ll send
+              you a reset link.
             </p>
 
             <label style={styles.label}>Email</label>
@@ -187,13 +269,21 @@ export default function AuthPage() {
               type="email"
               placeholder="your@email.com"
               style={styles.input}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a961")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+              }
             />
 
-            <button style={styles.primary} type="button">Send Reset Link</button>
+            <button style={styles.primary} type="button">
+              Send Reset Link
+            </button>
 
-            <button style={styles.backBtn} onClick={() => setView("login")} type="button">
+            <button
+              style={styles.backBtn}
+              onClick={() => setView("login")}
+              type="button"
+            >
               <BackArrow /> Back to Sign In
             </button>
           </div>
@@ -405,7 +495,16 @@ const styles: Record<string, React.CSSProperties> = {
 /* ── SVG icons ───────────────────────────────────────────────────────────── */
 function EyeOn() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
@@ -414,7 +513,16 @@ function EyeOn() {
 
 function EyeOff() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
       <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
       <line x1="1" y1="1" x2="23" y2="23" />
@@ -424,7 +532,16 @@ function EyeOff() {
 
 function BackArrow() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
     </svg>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { User, Scan, Menu, X } from "lucide-react";
 // import { Language } from "../translations";
 
@@ -370,7 +371,6 @@ interface NavbarProps {
   lang: Language;
   setLang: (lang: Language) => void;
   setView: (view: string) => void;
-  setAuthMode: (mode: "login" | "register") => void;
   user: { uid: string } | null;
   userData: { isAdmin?: boolean } | null;
   t: Record<string, string>;
@@ -381,13 +381,13 @@ export const Navbar = ({
   lang,
   setLang,
   setView,
-  setAuthMode,
   user,
   userData,
   t,
   startBooking,
 }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -459,10 +459,7 @@ export const Navbar = ({
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    setAuthMode("login");
-                    setView("auth");
-                  }}
+                  onClick={() => router.push("/auth")}
                   className="navbar-user-btn"
                 >
                   <User size={18} />
@@ -534,9 +531,8 @@ export const Navbar = ({
             ) : (
               <button
                 onClick={() => {
-                  setAuthMode("login");
-                  setView("auth");
                   setMenuOpen(false);
+                  router.push("/auth");
                 }}
                 className="navbar-mobile-login-btn"
               >
