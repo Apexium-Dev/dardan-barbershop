@@ -10,7 +10,7 @@ import Image from "next/image";
 const heroStyles = `
   /* Hero Section Container */
   .hero-section {
-    min-height: auto;
+    min-height: 600px;
     padding-top: 120px;
     padding-bottom: 60px;
     display: flex;
@@ -22,8 +22,16 @@ const heroStyles = `
 
   @media (min-width: 768px) {
     .hero-section {
-      padding: 0 48px;
+      min-height: 700px;
+      padding-left: 48px;
+      padding-right: 48px;
       padding-top: 80px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-section {
+      min-height: 800px;
     }
   }
 
@@ -35,12 +43,15 @@ const heroStyles = `
     display: grid;
     grid-template-columns: 1fr;
     gap: 32px;
-    align-items: flex-start;
+    align-items: center;
+    justify-items: center;
   }
 
   @media (min-width: 1024px) {
     .hero-container {
       grid-template-columns: 1fr 1fr;
+      align-items: center;
+      justify-items: start;
     }
   }
 
@@ -178,7 +189,8 @@ const heroStyles = `
   @media (min-width: 1024px) {
     .hero-image-container {
       aspect-ratio: 3 / 4;
-      max-width: 500px;
+      max-width: 350px;
+      width: 100%;
     }
   }
 
