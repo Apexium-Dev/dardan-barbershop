@@ -138,41 +138,16 @@ const navbarStyles = `
     }
   }
 
-  /* Admin button (hidden on mobile) */
-  .navbar-admin {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-weight: 700;
-    color: #e85d4d;
-    transition: color 200ms ease;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-
-  @media (min-width: 768px) {
-    .navbar-admin {
-      display: flex;
-    }
-  }
-
-  .navbar-admin:hover {
-    color: #fff;
-  }
-
-  /* Auth section */
+  /* Auth section - hidden on mobile */
   .navbar-auth {
-    display: flex;
+    display: none;
     gap: 8px;
     align-items: center;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .navbar-auth {
+      display: flex;
       gap: 12px;
     }
   }
@@ -341,6 +316,53 @@ const navbarStyles = `
   .navbar-mobile-link:hover {
     color: #c9a961;
   }
+
+  /* Mobile auth section */
+  .navbar-mobile-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(220, 208, 180, 0.1);
+  }
+
+  .navbar-mobile-login-btn {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(200, 200, 200, 0.6);
+    transition: color 200ms ease;
+    font-weight: 900;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 0;
+    text-align: left;
+  }
+
+  .navbar-mobile-login-btn:hover {
+    color: #c9a961;
+  }
+
+  .navbar-mobile-book-btn {
+    background-color: #dcd0b4;
+    color: #2d3b2d;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 900;
+    padding: 12px 24px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    transition: all 300ms ease;
+    text-align: center;
+  }
+
+  .navbar-mobile-book-btn:hover {
+    background-color: #fff;
+    transform: translateY(-2px);
+  }
 `;
 
 interface NavbarProps {
@@ -437,9 +459,9 @@ export const Navbar = ({
                     setAuthMode("login");
                     setView("auth");
                   }}
-                  className="navbar-login-btn"
+                  className="navbar-user-btn"
                 >
-                  {t.login}
+                  <User size={18} />
                 </button>
               )}
 
@@ -492,6 +514,41 @@ export const Navbar = ({
             >
               {t.location}
             </a>
+          </div>
+
+          <div className="navbar-mobile-auth">
+            {user ? (
+              <button
+                onClick={() => {
+                  setView("loyalty");
+                  setMenuOpen(false);
+                }}
+                className="navbar-mobile-login-btn"
+              >
+                {t.profile || "Profile"}
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setAuthMode("login");
+                  setView("auth");
+                  setMenuOpen(false);
+                }}
+                className="navbar-mobile-login-btn"
+              >
+                {t.login}
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                startBooking();
+                setMenuOpen(false);
+              }}
+              className="navbar-mobile-book-btn"
+            >
+              {t.bookNow}
+            </button>
           </div>
         </div>
       </nav>
