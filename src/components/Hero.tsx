@@ -125,17 +125,21 @@ const heroStyles = `
     color: #c9a961;
   }
 
-  /* Right image - takes up right half, fills height fully */
+  /* Right image - contained with padding and rounded corners */
   .hero-image-container {
     flex: 1;
     position: relative;
     overflow: hidden;
+    margin: 32px 48px 32px 0;
+    border-radius: 32px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
   }
 
   @media (max-width: 1024px) {
     .hero-image-container {
-      height: 400px;
+      height: 360px;
       flex: none;
+      margin: 0 24px 40px;
     }
   }
 
@@ -227,9 +231,7 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
         <div className="hero-image-overlay"></div>
         <div className="hero-quote">
           &ldquo;Heritage is earned,{" "}
-          <span className="hero-quote-highlight">
-            Style is chosen.&rdquo;
-          </span>
+          <span className="hero-quote-highlight">Style is chosen.&rdquo;</span>
         </div>
       </div>
     </section>
