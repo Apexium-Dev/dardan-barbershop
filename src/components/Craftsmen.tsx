@@ -29,6 +29,9 @@ const craftsmenStyles = `
   .craftsmen-section {
     padding: 120px 48px;
     background-color: #0f0f0f;
+  }
+
+  .craftsmen-inner {
     max-width: 90rem;
     margin: 0 auto;
   }
@@ -137,11 +140,12 @@ const craftsmenStyles = `
   .craftsmen-name {
     font-family: Georgia, 'Times New Roman', serif;
     font-style: italic;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 400;
     color: #ffffff;
-    margin: 0 0 6px 0;
+    margin: 0 0 8px 0;
     transition: transform 300ms ease;
+    display: block;
   }
 
   .craftsmen-card:hover .craftsmen-name {
@@ -154,15 +158,17 @@ const craftsmenStyles = `
     letter-spacing: 0.3em;
     color: #c9a961;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    display: block;
   }
 
   .craftsmen-bio {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.75;
-    color: rgba(255, 255, 255, 0.38);
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 300;
     margin: 0;
+    display: block;
   }
 
   /* Responsive */
@@ -197,7 +203,7 @@ export const Craftsmen = () => (
   <>
     <style>{craftsmenStyles}</style>
     <section id="barbers" className="craftsmen-section">
-
+      <div className="craftsmen-inner">
       {/* Header */}
       <div className="craftsmen-header">
         <div className="craftsmen-eyebrow-line" />
@@ -217,7 +223,11 @@ export const Craftsmen = () => (
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: i * 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{
+              duration: 0.7,
+              delay: i * 0.15,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
           >
             <div className="craftsmen-image-wrapper">
               <Image
@@ -237,7 +247,7 @@ export const Craftsmen = () => (
           </motion.div>
         ))}
       </div>
-
+      </div>
     </section>
   </>
 );
