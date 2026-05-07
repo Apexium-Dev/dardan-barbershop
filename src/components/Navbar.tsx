@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { User, Scan, Menu, X } from "lucide-react";
-import { Language } from "../translations";
+// import { Language } from "../translations";
 
 const navbarStyles = `
   /* Navbar Container */
@@ -14,9 +14,9 @@ const navbarStyles = `
     z-index: 60;
     padding: 16px 24px;
     transition: all 300ms ease;
-    background-color: rgba(23, 26, 23, 0.95);
+    background-color: rgba(15, 15, 15, 0.98);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(220, 208, 180, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   @media (min-width: 768px) {
@@ -93,12 +93,12 @@ const navbarStyles = `
   }
 
   .navbar-lang-btn.active {
-    color: #c9a961;
+    color: #ffffff;
     text-decoration: underline;
   }
 
   .navbar-lang-btn:not(.active) {
-    color: rgba(220, 208, 180, 0.2);
+    color: rgba(255, 255, 255, 0.4);
   }
 
   .navbar-lang-btn:not(.active):hover {
@@ -115,7 +115,7 @@ const navbarStyles = `
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.3em;
-    color: rgba(200, 200, 200, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     transition: color 200ms ease;
     text-decoration: none;
     font-weight: 700;
@@ -157,11 +157,11 @@ const navbarStyles = `
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1px solid rgba(220, 208, 180, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(200, 200, 200, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     transition: color 200ms ease;
     background: none;
     cursor: pointer;
@@ -290,7 +290,7 @@ const navbarStyles = `
     display: flex;
     gap: 12px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(220, 208, 180, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-wrap: wrap;
   }
 
@@ -304,7 +304,7 @@ const navbarStyles = `
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.3em;
-    color: rgba(200, 200, 200, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     transition: color 200ms ease;
     text-decoration: none;
     font-weight: 700;
@@ -323,8 +323,8 @@ const navbarStyles = `
     flex-direction: column;
     gap: 12px;
     padding: 16px 0;
-    border-top: 1px solid rgba(220, 208, 180, 0.1);
-    border-bottom: 1px solid rgba(220, 208, 180, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     align-items: center;
     justify-content: center;
   }
@@ -333,7 +333,7 @@ const navbarStyles = `
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(200, 200, 200, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     transition: color 200ms ease;
     font-weight: 900;
     background: none;
