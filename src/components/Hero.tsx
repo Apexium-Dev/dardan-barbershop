@@ -10,57 +10,30 @@ import Image from "next/image";
 const heroStyles = `
   /* Hero Section Container */
   .hero-section {
-    min-height: auto;
-    padding-top: 80px;
-    padding-bottom: 40px;
+    height: calc(100vh - 80px);
+    margin-top: 80px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Left content - takes up left half, centered vertically */
+  .hero-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-left: 24px;
-    padding-right: 24px;
+    padding: 48px 64px;
   }
 
-  @media (min-width: 768px) {
+  @media (max-width: 1024px) {
     .hero-section {
-      padding-left: 48px;
-      padding-right: 48px;
-      padding-top: 60px;
-      padding-bottom: 40px;
+      flex-direction: column;
+      height: auto;
     }
-  }
-
-  @media (min-width: 1024px) {
-    .hero-section {
-      padding-top: 60px;
-      padding-bottom: 40px;
+    .hero-content {
+      padding: 60px 32px 40px;
     }
-  }
-
-  /* Main container */
-  .hero-container {
-    max-width: 80rem;
-    margin: 0 auto;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-    align-items: center;
-    justify-items: center;
-  }
-
-  @media (min-width: 1024px) {
-    .hero-container {
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: center;
-      justify-items: start;
-    }
-  }
-
-  /* Left content section */
-  .hero-content {
-    display: flex;
-    flex-direction: column;
   }
 
   /* Established badge */
@@ -68,7 +41,7 @@ const heroStyles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
   .hero-badge-line {
@@ -88,18 +61,12 @@ const heroStyles = `
 
   /* Main title */
   .hero-title {
-    font-size: clamp(28px, 8vw, 56px);
-    line-height: 0.85;
+    font-size: clamp(40px, 5.5vw, 80px);
+    line-height: 0.9;
     font-family: Georgia, serif;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
     letter-spacing: -0.02em;
     color: #ffffff;
-  }
-
-  @media (min-width: 1024px) {
-    .hero-title {
-      font-size: clamp(48px, 7vw, 84px);
-    }
   }
 
   .hero-title-highlight {
@@ -118,13 +85,13 @@ const heroStyles = `
   .hero-book-btn {
     background-color: #c9a961;
     color: #0f0f0f;
-    padding: 20px 40px;
+    padding: 18px 36px;
     border-radius: 999px;
     border: none;
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     transition: all 300ms ease;
     box-shadow: 0 0 40px rgba(201, 169, 97, 0.2);
@@ -135,25 +102,19 @@ const heroStyles = `
     transform: scale(1.05);
   }
 
-  .hero-book-btn:active {
-    transform: scale(0.98);
-  }
-
   /* Member Portal Button */
   .hero-member-btn {
-    border: 1px solid rgba(201, 169, 97, 0.3);
-    padding: 20px 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 18px 36px;
     border-radius: 999px;
     background: none;
     color: rgba(255, 255, 255, 0.8);
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     transition: all 300ms ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -161,38 +122,20 @@ const heroStyles = `
 
   .hero-member-btn:hover {
     border-color: #c9a961;
-    background-color: rgba(201, 169, 97, 0.05);
-  }
-
-  .hero-member-btn svg {
-    transition: all 300ms ease;
-  }
-
-  .hero-member-btn:hover svg {
-    fill: #c9a961;
     color: #c9a961;
   }
 
-  /* Right image section */
+  /* Right image - takes up right half, fills height fully */
   .hero-image-container {
+    flex: 1;
     position: relative;
-    aspect-ratio: 1;
-    border-radius: 64px;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   }
 
-  @media (min-width: 768px) {
+  @media (max-width: 1024px) {
     .hero-image-container {
-      aspect-ratio: 16 / 9;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .hero-image-container {
-      aspect-ratio: 3 / 4;
-      max-width: 420px;
-      width: 100%;
+      height: 400px;
+      flex: none;
     }
   }
 
@@ -206,23 +149,24 @@ const heroStyles = `
 
   .hero-image-container:hover .hero-image {
     filter: grayscale(0%);
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 
   /* Image overlay */
   .hero-image-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, #0f0f0f, transparent, transparent);
-    opacity: 0.8;
+    background: linear-gradient(to right, #0f0f0f 0%, transparent 30%),
+                linear-gradient(to top, #0f0f0f 0%, transparent 40%);
+    opacity: 0.6;
   }
 
   /* Quote section */
   .hero-quote {
     position: absolute;
-    bottom: 48px;
-    left: 48px;
-    font-size: 20px;
+    bottom: 40px;
+    left: 40px;
+    font-size: 18px;
     font-family: Georgia, serif;
     font-style: italic;
     color: #dcd0b4;
@@ -231,14 +175,6 @@ const heroStyles = `
 
   .hero-quote-highlight {
     color: #c9a961;
-  }
-
-  @media (max-width: 768px) {
-    .hero-quote {
-      font-size: 16px;
-      bottom: 32px;
-      left: 32px;
-    }
   }
 `;
 
@@ -252,50 +188,48 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
   <>
     <style>{heroStyles}</style>
     <section className="hero-section">
-      <div className="hero-container">
-        <div className="hero-content">
-          <motion.div
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            className="hero-badge"
+      <div className="hero-content">
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="hero-badge"
+        >
+          <div className="hero-badge-line"></div>
+          <span className="hero-badge-text">Established 2007</span>
+        </motion.div>
+
+        <h1 className="hero-title">
+          {t.heroTitle} <br />
+          <span className="hero-title-highlight">{t.heroSubtitle}</span>
+        </h1>
+
+        <div className="hero-buttons">
+          <button onClick={() => startBooking()} className="hero-book-btn">
+            {t.bookNow}
+          </button>
+          <button
+            onClick={() => setView("loyalty")}
+            className="hero-member-btn"
           >
-            <div className="hero-badge-line"></div>
-            <span className="hero-badge-text">Established 2007</span>
-          </motion.div>
-
-          <h1 className="hero-title">
-            {t.heroTitle} <br />
-            <span className="hero-title-highlight">{t.heroSubtitle}</span>
-          </h1>
-
-          <div className="hero-buttons">
-            <button onClick={() => startBooking()} className="hero-book-btn">
-              {t.bookNow}
-            </button>
-            <button
-              onClick={() => setView("loyalty")}
-              className="hero-member-btn"
-            >
-              {t.memberPortal} <Zap size={14} />
-            </button>
-          </div>
+            {t.memberPortal} <Zap size={14} />
+          </button>
         </div>
+      </div>
 
-        <div className="hero-image-container">
-          <Image
-            src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1200"
-            alt="Barbershop Atmosphere"
-            fill
-            className="hero-image"
-            style={{ objectFit: "cover" }}
-          />
-          <div className="hero-image-overlay"></div>
-          <div className="hero-quote">
-            &ldquo;Heritage is earned,{" "}
-            <span className="hero-quote-highlight">
-              Style is chosen.&rdquo;
-            </span>
-          </div>
+      <div className="hero-image-container">
+        <Image
+          src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1200"
+          alt="Barbershop Atmosphere"
+          fill
+          className="hero-image"
+          style={{ objectFit: "cover" }}
+        />
+        <div className="hero-image-overlay"></div>
+        <div className="hero-quote">
+          &ldquo;Heritage is earned,{" "}
+          <span className="hero-quote-highlight">
+            Style is chosen.&rdquo;
+          </span>
         </div>
       </div>
     </section>
