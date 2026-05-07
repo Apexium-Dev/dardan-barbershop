@@ -5,6 +5,8 @@ import Image from "next/image";
 import { User, Scan, Menu, X } from "lucide-react";
 // import { Language } from "../translations";
 
+type Language = "en" | "al" | "mk";
+
 const navbarStyles = `
   /* Navbar Container */
   .navbar {
@@ -371,11 +373,11 @@ const navbarStyles = `
 interface NavbarProps {
   lang: Language;
   setLang: (lang: Language) => void;
-  setView: (view: any) => void;
+  setView: (view: string) => void;
   setAuthMode: (mode: "login" | "register") => void;
-  user: any;
-  userData: any;
-  t: any;
+  user: { uid: string } | null;
+  userData: { isAdmin?: boolean } | null;
+  t: Record<string, string>;
   startBooking: () => void;
 }
 

@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import Image from "next/image";
 
-// type Language = "en" | "al" | "mk";
-
 const heroStyles = `
   /* Hero Section Container */
   .hero-section {
