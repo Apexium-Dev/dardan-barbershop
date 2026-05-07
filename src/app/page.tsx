@@ -1,10 +1,11 @@
 "use client";
 
 import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/Hero";
 
 export default function Home() {
   return (
-    <main>
+    <main style={{ backgroundColor: "#0f0f0f", color: "#ffffff" }}>
       <Navbar
         lang="en"
         setLang={() => {}}
@@ -21,6 +22,16 @@ export default function Home() {
           bookNow: "Book Now",
         }}
         startBooking={() => {}}
+      />
+      <Hero
+        t={{
+          heroTitle: "Precision Craftsmanship",
+          heroSubtitle: "In Every Cut",
+          memberPortal: "Member Portal",
+          bookNow: "Book Now",
+        }}
+        startBooking={() => {}}
+        setView={() => {}}
       />
     </main>
   );
