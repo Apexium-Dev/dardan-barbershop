@@ -10,12 +10,14 @@ import Image from "next/image";
 const heroStyles = `
   /* Hero Section Container */
   .hero-section {
-    min-height: 100vh;
+    min-height: auto;
+    padding-top: 120px;
+    padding-bottom: 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 24px;
-    padding-top: 80px;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   @media (min-width: 768px) {
@@ -32,8 +34,8 @@ const heroStyles = `
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 64px;
-    align-items: center;
+    gap: 32px;
+    align-items: flex-start;
   }
 
   @media (min-width: 1024px) {
@@ -73,10 +75,10 @@ const heroStyles = `
 
   /* Main title */
   .hero-title {
-    font-size: clamp(32px, 12vw, 84px);
+    font-size: clamp(28px, 8vw, 56px);
     line-height: 0.85;
     font-family: Georgia, serif;
-    margin-bottom: 48px;
+    margin-bottom: 32px;
     letter-spacing: -0.02em;
     color: #ffffff;
   }
@@ -175,7 +177,8 @@ const heroStyles = `
 
   @media (min-width: 1024px) {
     .hero-image-container {
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 3 / 4;
+      max-width: 500px;
     }
   }
 
