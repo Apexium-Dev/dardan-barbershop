@@ -200,16 +200,18 @@ const footerStyles = `
 
   .footer-made {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.12);
-    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.1em;
     margin: 0;
     text-decoration: none;
     transition: color 200ms ease;
     display: inline-block;
+    text-transform: uppercase;
+    font-weight: 600;
   }
 
   .footer-made:hover {
-    color: rgba(201, 169, 97, 0.5);
+    color: #c9a961;
   }
 
   /* Responsive */
