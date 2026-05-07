@@ -13,7 +13,7 @@ const navbarStyles = `
     top: 0;
     width: 100%;
     z-index: 60;
-    padding: 14px 24px;
+    padding: 8px 24px;
     transition: all 500ms ease;
     background-color: rgba(23, 26, 23, 0.8);
     backdrop-filter: blur(12px);
@@ -22,7 +22,7 @@ const navbarStyles = `
 
   @media (min-width: 768px) {
     .navbar {
-      padding: 18px 24px;
+      padding: 10px 24px;
     }
   }
 
@@ -348,8 +348,8 @@ export const Navbar = ({
               <Image
                 src="/logo.png"
                 alt="Dardan Barbershop"
-                width={40}
-                height={40}
+                width={90}
+                height={90}
                 style={{ height: "auto", width: "auto" }}
               />
             </button>
