@@ -27,7 +27,7 @@ const team = [
 
 const craftsmenStyles = `
   .craftsmen-section {
-    padding: 120px 48px;
+    padding: 72px 48px 96px;
     background-color: #0f0f0f;
   }
 
@@ -41,7 +41,7 @@ const craftsmenStyles = `
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
 
   .craftsmen-eyebrow-line {
@@ -77,7 +77,7 @@ const craftsmenStyles = `
     width: 100%;
     height: 1px;
     background: rgba(255,255,255,0.07);
-    margin: 32px 0 64px 0;
+    margin: 24px 0 40px 0;
   }
 
   /* Grid */
@@ -174,7 +174,7 @@ const craftsmenStyles = `
   /* Responsive */
   @media (max-width: 1024px) {
     .craftsmen-section {
-      padding: 80px 32px;
+      padding: 56px 32px 72px;
     }
 
     .craftsmen-grid {
@@ -185,7 +185,7 @@ const craftsmenStyles = `
 
   @media (max-width: 640px) {
     .craftsmen-section {
-      padding: 64px 20px;
+      padding: 48px 20px 64px;
     }
 
     .craftsmen-grid {
@@ -204,49 +204,49 @@ export const Craftsmen = () => (
     <style>{craftsmenStyles}</style>
     <section id="barbers" className="craftsmen-section">
       <div className="craftsmen-inner">
-      {/* Header */}
-      <div className="craftsmen-header">
-        <div className="craftsmen-eyebrow-line" />
-        <span className="craftsmen-eyebrow">The Team</span>
-      </div>
-      <h2 className="craftsmen-title">
-        The <em>Craftsmen.</em>
-      </h2>
-      <div className="craftsmen-divider" />
+        {/* Header */}
+        <div className="craftsmen-header">
+          <div className="craftsmen-eyebrow-line" />
+          <span className="craftsmen-eyebrow">The Team</span>
+        </div>
+        <h2 className="craftsmen-title">
+          The <em>Craftsmen.</em>
+        </h2>
+        <div className="craftsmen-divider" />
 
-      {/* Grid */}
-      <div className="craftsmen-grid">
-        {team.map((member, i) => (
-          <motion.div
-            key={member.name}
-            className="craftsmen-card"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{
-              duration: 0.7,
-              delay: i * 0.15,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-          >
-            <div className="craftsmen-image-wrapper">
-              <Image
-                src={member.img}
-                alt={member.name}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="craftsmen-image"
-              />
-              <div className="craftsmen-overlay" />
-              <span className="craftsmen-number">0{i + 1}</span>
-            </div>
+        {/* Grid */}
+        <div className="craftsmen-grid">
+          {team.map((member, i) => (
+            <motion.div
+              key={member.name}
+              className="craftsmen-card"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{
+                duration: 0.7,
+                delay: i * 0.15,
+                ease: [0.25, 0.1, 0.25, 1],
+              }}
+            >
+              <div className="craftsmen-image-wrapper">
+                <Image
+                  src={member.img}
+                  alt={member.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="craftsmen-image"
+                />
+                <div className="craftsmen-overlay" />
+                <span className="craftsmen-number">0{i + 1}</span>
+              </div>
 
-            <h3 className="craftsmen-name">{member.name}</h3>
-            <p className="craftsmen-role">{member.role}</p>
-            <p className="craftsmen-bio">{member.bio}</p>
-          </motion.div>
-        ))}
-      </div>
+              <h3 className="craftsmen-name">{member.name}</h3>
+              <p className="craftsmen-role">{member.role}</p>
+              <p className="craftsmen-bio">{member.bio}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   </>
