@@ -110,93 +110,93 @@ export default function TermsOfService() {
 
         <p className="legal-eyebrow">Legal</p>
         <h1 className="legal-title">Terms of Service</h1>
-        <span className="legal-date">Last updated: May 7, 2026</span>
+        <span className="legal-date">Last updated: May 2026</span>
         <div className="legal-divider" />
 
         <div className="legal-section">
-          <h2>1. Acceptance of Terms</h2>
           <p>
-            By accessing and using the Dardan Barbershop website, you accept and
-            agree to be bound by these Terms of Service. If you do not agree,
-            please do not use this site.
+            By using the Barbershop Dardan website or booking services, you
+            agree to the following terms.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>2. Services</h2>
-          <p>
-            Dardan Barbershop provides professional barbering services including
-            haircuts, beard trims, hair colouring, and related grooming
-            services. Service availability and pricing are subject to change
-            without notice.
-          </p>
-        </div>
-
-        <div className="legal-section">
-          <h2>3. Appointments & Cancellations</h2>
-          <p>
-            Appointments can be booked through our website. We ask that you:
-          </p>
+          <h2>Appointments</h2>
           <ul>
-            <li>Arrive on time for your scheduled appointment</li>
+            <li>Clients are encouraged to arrive on time.</li>
             <li>
-              Provide at least 24 hours notice if you need to cancel or
-              reschedule
+              Late arrivals may result in shortened or canceled appointments.
             </li>
-            <li>Contact us directly for any urgent changes</li>
+            <li>Appointments can be canceled or rescheduled in advance.</li>
           </ul>
         </div>
 
         <div className="legal-section">
-          <h2>4. Pricing</h2>
+          <h2>Payments</h2>
+          <ul>
+            <li>
+              Prices for services are displayed in the shop or on our
+              website/social media.
+            </li>
+            <li>Payment is due after services are completed.</li>
+          </ul>
+        </div>
+
+        <div className="legal-section">
+          <h2>Conduct</h2>
           <p>
-            All prices are listed in Macedonian Denars (MKD). Prices are subject
-            to change. The price displayed at the time of booking is the price
-            you will be charged.
+            We reserve the right to refuse service to anyone displaying
+            inappropriate, abusive, or unsafe behavior.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>5. User Conduct</h2>
+          <h2>Website Usage</h2>
           <p>
-            You agree not to misuse our website or services. This includes but
-            is not limited to: submitting false information, attempting to
-            disrupt the site, or using the site for any unlawful purpose.
+            You agree not to misuse the website, attempt unauthorized access, or
+            disrupt website functionality.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>6. Intellectual Property</h2>
+          <h2>Content</h2>
           <p>
-            All content on this website — including logos, images, and text — is
-            the property of Dardan Barbershop and may not be reproduced without
-            permission.
+            All website content including logos, photos, and designs belongs to
+            Barbershop Dardan unless otherwise stated.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>7. Limitation of Liability</h2>
+          <h2>Limitation of Liability</h2>
           <p>
-            Dardan Barbershop is not liable for any indirect, incidental, or
-            consequential damages arising from the use of this website or our
-            services.
+            We aim to provide accurate information and quality services, but we
+            are not responsible for:
+          </p>
+          <ul>
+            <li>Temporary website downtime</li>
+            <li>Third-party service interruptions</li>
+            <li>Indirect damages resulting from website use</li>
+          </ul>
+        </div>
+
+        <div className="legal-section">
+          <h2>Changes to Terms</h2>
+          <p>
+            We may update these Terms of Service at any time. Continued use of
+            the website means you accept the updated terms.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>8. Changes to Terms</h2>
+          <h2>Contact</h2>
           <p>
-            We reserve the right to update these Terms at any time. Continued
-            use of the site after changes constitutes acceptance of the new
-            Terms.
-          </p>
-        </div>
-
-        <div className="legal-section">
-          <h2>9. Contact</h2>
-          <p>
-            For any questions regarding these Terms, contact us at Dardan
-            Barbershop, Dibër, Macedonia.
+            <strong style={{ color: "rgba(255,255,255,0.7)" }}>
+              Barbershop Dardan
+            </strong>
+            <br />
+            Atanasie Iliq, Debar, North Macedonia
+            <br />
+            Phone: <a href="tel:072646141">072 646 141</a>
           </p>
         </div>
       </div>

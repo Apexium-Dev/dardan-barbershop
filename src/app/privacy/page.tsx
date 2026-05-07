@@ -110,69 +110,89 @@ export default function PrivacyPolicy() {
 
         <p className="legal-eyebrow">Legal</p>
         <h1 className="legal-title">Privacy Policy</h1>
-        <span className="legal-date">Last updated: May 7, 2026</span>
+        <span className="legal-date">Last updated: May 2026</span>
         <div className="legal-divider" />
 
         <div className="legal-section">
-          <h2>1. Information We Collect</h2>
           <p>
-            When you use our website or book an appointment, we may collect the
-            following information:
+            Welcome to Barbershop Dardan. We respect your privacy and are
+            committed to protecting any personal information you share with us
+            through our website, social media pages, or booking/contact forms.
           </p>
+        </div>
+
+        <div className="legal-section">
+          <h2>Information We Collect</h2>
+          <p>We may collect:</p>
           <ul>
-            <li>Name, phone number, and email address (when booking)</li>
-            <li>Usage data and analytics (via Vercel Analytics)</li>
-            <li>Device and browser information</li>
+            <li>Name</li>
+            <li>Phone number</li>
+            <li>Email address</li>
+            <li>Appointment details</li>
+            <li>Messages you send us</li>
+            <li>Basic website usage information (such as pages visited)</li>
           </ul>
         </div>
 
         <div className="legal-section">
-          <h2>2. How We Use Your Information</h2>
-          <p>We use the information we collect to:</p>
+          <h2>How We Use Your Information</h2>
+          <p>We use your information to:</p>
           <ul>
-            <li>Confirm and manage your appointments</li>
-            <li>Send reminders or updates about your booking</li>
-            <li>Improve our website and services</li>
+            <li>Book and manage appointments</li>
+            <li>Contact you about your booking</li>
+            <li>Improve our services and website</li>
+            <li>Respond to questions or requests</li>
+            <li>Send updates or promotions (only if you agree)</li>
           </ul>
         </div>
 
         <div className="legal-section">
-          <h2>3. Data Sharing</h2>
+          <h2>Information Sharing</h2>
           <p>
-            We do not sell or share your personal data with third parties. Your
-            information is used solely to operate and improve our services.
+            We do not sell or rent your personal information. Your data may only
+            be shared with trusted service providers that help us operate the
+            website or booking system.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>4. Cookies & Analytics</h2>
+          <h2>Data Security</h2>
           <p>
-            We use Vercel Analytics to understand how visitors use our site.
-            This data is anonymous and does not identify individual users.
+            We take reasonable measures to protect your information from
+            unauthorized access, loss, or misuse.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>5. Data Retention</h2>
+          <h2>Cookies</h2>
           <p>
-            We retain your personal data only for as long as necessary to
-            fulfill the purposes outlined in this policy.
+            Our website may use cookies to improve user experience and analyze
+            website traffic.
           </p>
         </div>
 
         <div className="legal-section">
-          <h2>6. Your Rights</h2>
-          <p>
-            You have the right to request access to, correction of, or deletion
-            of your personal data. Contact us at any time.
-          </p>
+          <h2>Your Rights</h2>
+          <p>You may request to:</p>
+          <ul>
+            <li>Access your data</li>
+            <li>Correct your information</li>
+            <li>Delete your information</li>
+            <li>Stop receiving promotional messages</li>
+          </ul>
+          <p>To do so, contact us using the information below.</p>
         </div>
 
         <div className="legal-section">
-          <h2>7. Contact</h2>
+          <h2>Contact</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact
-            us at Dardan Barbershop, Dibër, Macedonia.
+            <strong style={{ color: "rgba(255,255,255,0.7)" }}>
+              Barbershop Dardan
+            </strong>
+            <br />
+            Atanasie Iliq, Debar, North Macedonia
+            <br />
+            Phone: <a href="tel:072646141">072 646 141</a>
           </p>
         </div>
       </div>
