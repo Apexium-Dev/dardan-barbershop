@@ -72,17 +72,25 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       // Profile: wide at pivot base, narrows to a fine point at tip.
       // Spine (right/+x) is slightly wider & straighter; cutting edge curves in.
       const bladeProfile = new THREE.Shape();
-      bladeProfile.moveTo(0, 0);               // base, cutting-edge corner
-      bladeProfile.bezierCurveTo(             // cutting edge — gently concave
-        -0.04, 0.9,
-        -0.03, 1.9,
-        0.01,  2.72,                           // near-tip
+      bladeProfile.moveTo(0, 0); // base, cutting-edge corner
+      bladeProfile.bezierCurveTo(
+        // cutting edge — gently concave
+        -0.04,
+        0.9,
+        -0.03,
+        1.9,
+        0.01,
+        2.72, // near-tip
       );
-      bladeProfile.lineTo(0.03, 2.78);         // very tip
-      bladeProfile.bezierCurveTo(             // spine — slightly convex, wider
-        0.1,  1.95,
-        0.17,  0.9,
-        0.18,  0,                              // base, spine corner
+      bladeProfile.lineTo(0.03, 2.78); // very tip
+      bladeProfile.bezierCurveTo(
+        // spine — slightly convex, wider
+        0.1,
+        1.95,
+        0.17,
+        0.9,
+        0.18,
+        0, // base, spine corner
       );
       bladeProfile.lineTo(0, 0);
 
@@ -99,11 +107,11 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
       // ── Shank — tapered gold handle bar ──────────────────────────────
       const shankProfile = new THREE.Shape();
-      shankProfile.moveTo(-0.07,  0);
+      shankProfile.moveTo(-0.07, 0);
       shankProfile.lineTo(-0.055, -0.88);
-      shankProfile.lineTo( 0.055, -0.88);
-      shankProfile.lineTo( 0.07,  0);
-      shankProfile.lineTo(-0.07,  0);
+      shankProfile.lineTo(0.055, -0.88);
+      shankProfile.lineTo(0.07, 0);
+      shankProfile.lineTo(-0.07, 0);
 
       const shankGeo = new THREE.ExtrudeGeometry(shankProfile, {
         depth: 0.09,
@@ -116,7 +124,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       g.add(new THREE.Mesh(shankGeo, goldMat));
 
       // ── Finger ring ───────────────────────────────────────────────────
-      const ringR    = flip < 0 ? 0.29 : 0.26; // thumb ring slightly smaller
+      const ringR = flip < 0 ? 0.29 : 0.26; // thumb ring slightly smaller
       const ringTube = 0.068;
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(ringR, ringTube, 22, 64),
@@ -158,7 +166,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     };
 
     const bladeA = makeArm(-1, -0.04);
-    const bladeB = makeArm( 1,  0.04);
+    const bladeB = makeArm(1, 0.04);
 
     // ── Pivot screw — layered discs ──────────────────────────────────
     const pivotBase = new THREE.Mesh(
@@ -177,7 +185,11 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     // Cross slot on screw head
     const slotH = new THREE.Mesh(
       new THREE.BoxGeometry(0.18, 0.022, 0.04),
-      new THREE.MeshStandardMaterial({ color: "#222", roughness: 0.8, metalness: 0.2 }),
+      new THREE.MeshStandardMaterial({
+        color: "#222",
+        roughness: 0.8,
+        metalness: 0.2,
+      }),
     );
     slotH.position.z = 0.1;
     const slotV = slotH.clone();
@@ -248,11 +260,11 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
       // Scissors: arms open/close around pivot at origin
       const openAngle = (Math.sin(t * 2.2) * 0.5 + 0.5) * 0.48;
-      bladeA.rotation.z =  openAngle;
+      bladeA.rotation.z = openAngle;
       bladeB.rotation.z = -openAngle;
       // Gentle float + slow y-turn to show 3D shape
-      scissorsGroup.position.y  = Math.sin(t * 1.0) * 0.1;
-      scissorsGroup.rotation.y  = Math.sin(t * 0.35) * 0.28;
+      scissorsGroup.position.y = Math.sin(t * 1.0) * 0.1;
+      scissorsGroup.rotation.y = Math.sin(t * 0.35) * 0.28;
 
       dustPoints.rotation.y += 0.003;
       dustPoints.rotation.x += 0.001;
