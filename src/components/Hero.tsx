@@ -189,7 +189,7 @@ const heroStyles = `
   @media (min-width: 1024px) {
     .hero-image-container {
       aspect-ratio: 3 / 4;
-      max-width: 350px;
+      max-width: 420px;
       width: 100%;
     }
   }
