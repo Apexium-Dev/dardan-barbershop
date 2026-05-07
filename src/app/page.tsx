@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Catalogue } from "@/components/Catalogue";
 import { Craftsmen } from "@/components/Craftsmen";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -37,6 +38,7 @@ export default function Home() {
       />
       <Catalogue startBooking={() => {}} />
       <Craftsmen />
+      <Footer />
     </main>
   );
 }
