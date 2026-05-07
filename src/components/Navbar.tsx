@@ -229,7 +229,7 @@ const navbarStyles = `
     justify-content: center;
     background: none;
     border: none;
-    color: #dcd0b4;
+    color: #ffffff;
     cursor: pointer;
     padding: 8px;
     transition: all 200ms ease;
@@ -237,11 +237,7 @@ const navbarStyles = `
 
   .navbar-menu-btn:hover {
     transform: scale(1.1);
-    opacity: 0.8;
-  }
-
-  .navbar-menu-btn svg {
-    transition: transform 300ms ease;
+    color: #c9a961;
   }
 
   @media (min-width: 1024px) {
