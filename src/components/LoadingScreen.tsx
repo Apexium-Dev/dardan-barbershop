@@ -34,163 +34,144 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     renderer.shadowMap.enabled = true;
     mount.appendChild(renderer.domElement);
 
-    // ── Barber Pole Stripe Texture ─────────────────────────────────────
-    const texSize = 512;
-    const texCanvas = document.createElement("canvas");
-    texCanvas.width = texSize;
-    texCanvas.height = texSize;
-    const ctx = texCanvas.getContext("2d")!;
+    // ── Materials ──────────────────────────────────────────────────────
+    const goldMat = new THREE.MeshStandardMaterial({ color: "#c9a961", roughness: 0.25, metalness: 0.85 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: "#1a1a1a", roughness: 0.5, metalness: 0.4 });
+    const silverMat = new THREE.MeshStandardMaterial({ color: "#aaaaaa", roughness: 0.2, metalness: 0.95 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: "#cccccc", roughness: 0.1, metalness: 1.0 });
 
-    // Dark base
-    ctx.fillStyle = "#111111";
-    ctx.fillRect(0, 0, texSize, texSize);
+    // ── Clipper Machine ────────────────────────────────────────────────
+    const clipperGroup = new THREE.Group();
+    clipperGroup.position.set(-1.4, 0, 0);
 
-    // Diagonal gold stripes
-    const stripeW = 60;
-    const angle = 45;
-    const rad = (angle * Math.PI) / 180;
-    const repeat = 16;
-    for (let i = -repeat; i < repeat * 2; i++) {
-      const x = i * stripeW * 2;
-      ctx.save();
-      ctx.translate(texSize / 2, texSize / 2);
-      ctx.rotate(rad);
-      ctx.fillStyle = "#c9a961";
-      ctx.fillRect(x - texSize, -texSize * 2, stripeW, texSize * 4);
-      // Thin white accent inside gold stripe
-      ctx.fillStyle = "rgba(255,255,255,0.08)";
-      ctx.fillRect(x - texSize, -texSize * 2, stripeW * 0.2, texSize * 4);
-      ctx.restore();
+    clipperGroup.add(new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.8, 0.55), darkMat));
+
+    [-0.4, 0, 0.4].forEach((y) => {
+      const ridge = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.055, 0.58), goldMat);
+      ridge.position.y = y;
+      clipperGroup.add(ridge);
+    });
+
+    const taper = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.55, 0.4, 6), darkMat);
+    taper.position.y = 1.1;
+    clipperGroup.add(taper);
+
+    const bladeHouse = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.18, 0.52), chromeMat);
+    bladeHouse.position.y = 1.36;
+    clipperGroup.add(bladeHouse);
+
+    for (let i = 0; i < 5; i++) {
+      const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.28, 0.06), silverMat);
+      tooth.position.set(-0.24 + i * 0.12, 1.58, 0);
+      clipperGroup.add(tooth);
     }
 
-    const poleTexture = new THREE.CanvasTexture(texCanvas);
-    poleTexture.wrapS = THREE.RepeatWrapping;
-    poleTexture.wrapT = THREE.RepeatWrapping;
-    poleTexture.repeat.set(1, 3);
-
-    // ── Barber Pole Body ───────────────────────────────────────────────
-    const poleGeo = new THREE.CylinderGeometry(0.42, 0.42, 3.2, 64, 1, false);
-    const poleMat = new THREE.MeshStandardMaterial({
-      map: poleTexture,
-      roughness: 0.3,
-      metalness: 0.2,
-    });
-    const pole = new THREE.Mesh(poleGeo, poleMat);
-    scene.add(pole);
-
-    // ── Gold Top & Bottom Caps ─────────────────────────────────────────
-    const capMat = new THREE.MeshStandardMaterial({
-      color: "#c9a961",
-      roughness: 0.25,
-      metalness: 0.7,
-    });
-
-    const topCapGeo = new THREE.CylinderGeometry(0.5, 0.42, 0.14, 64);
-    const topCap = new THREE.Mesh(topCapGeo, capMat);
-    topCap.position.y = 1.67;
-    scene.add(topCap);
-
-    const topDomeGeo = new THREE.SphereGeometry(0.5, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-    const topDome = new THREE.Mesh(topDomeGeo, capMat);
-    topDome.position.y = 1.74;
-    scene.add(topDome);
-
-    const botCapGeo = new THREE.CylinderGeometry(0.42, 0.5, 0.14, 64);
-    const botCap = new THREE.Mesh(botCapGeo, capMat);
-    botCap.position.y = -1.67;
-    scene.add(botCap);
-
-    const botDomeGeo = new THREE.SphereGeometry(0.5, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-    const botDome = new THREE.Mesh(botDomeGeo, capMat);
-    botDome.position.y = -1.74;
-    scene.add(botDome);
-
-    // ── Gold Ring Accents ──────────────────────────────────────────────
-    const ringGeo = new THREE.TorusGeometry(0.46, 0.03, 16, 64);
-    const ringMat = new THREE.MeshStandardMaterial({
-      color: "#dcd0b4",
-      roughness: 0.2,
-      metalness: 0.9,
-    });
-    [-1.4, -0.7, 0, 0.7, 1.4].forEach((y) => {
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.y = y;
-      ring.rotation.x = Math.PI / 2;
-      scene.add(ring);
-    });
-
-    // ── Floating Gold Particles ────────────────────────────────────────
-    const particleCount = 120;
-    const positions = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
-    for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const r = 2.5 + Math.random() * 3.5;
-      positions[i * 3] = Math.cos(theta) * r;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 7;
-      positions[i * 3 + 2] = Math.sin(theta) * r - 3;
-      sizes[i] = Math.random() * 3 + 1;
+    const movingBlade = new THREE.Group();
+    for (let i = 0; i < 4; i++) {
+      const mTooth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.05), goldMat);
+      mTooth.position.set(-0.18 + i * 0.12, 1.52, 0);
+      movingBlade.add(mTooth);
     }
-    const partGeo = new THREE.BufferGeometry();
-    partGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    partGeo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-    const partMat = new THREE.PointsMaterial({
-      color: "#c9a961",
-      size: 0.04,
-      transparent: true,
-      opacity: 0.5,
-      sizeAttenuation: true,
-    });
-    const particles = new THREE.Points(partGeo, partMat);
-    scene.add(particles);
+    clipperGroup.add(movingBlade);
+
+    const switchMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.08, 16), goldMat);
+    switchMesh.rotation.z = Math.PI / 2;
+    switchMesh.position.set(0.62, 0.3, 0);
+    clipperGroup.add(switchMesh);
+
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3, 12), darkMat);
+    cord.position.y = -1.05;
+    clipperGroup.add(cord);
+    scene.add(clipperGroup);
+
+    // ── Scissors ──────────────────────────────────────────────────────
+    const scissorsGroup = new THREE.Group();
+    scissorsGroup.position.set(1.5, 0, 0);
+    scissorsGroup.rotation.z = -Math.PI / 6;
+
+    const makeBlade = (flip: number) => {
+      const g = new THREE.Group();
+      const bl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.2, 0.06), chromeMat);
+      bl.position.y = 0.9;
+      g.add(bl);
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.35, 8), silverMat);
+      tip.position.y = 2.08;
+      g.add(tip);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.055, 16, 32), goldMat);
+      ring.position.set(flip * 0.12, -0.85, 0);
+      g.add(ring);
+      const shank = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.06), goldMat);
+      shank.position.set(flip * 0.06, -0.45, 0);
+      g.add(shank);
+      return g;
+    };
+
+    const bladeA = makeBlade(-1);
+    const bladeB = makeBlade(1);
+    const pivotMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.1, 16), goldMat);
+    pivotMesh.rotation.x = Math.PI / 2;
+    scissorsGroup.add(bladeA, bladeB, pivotMesh);
+    scene.add(scissorsGroup);
+
+    // ── Dust particles ─────────────────────────────────────────────────
+    const pCount = 80;
+    const pPos = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      pPos[i * 3]     = (Math.random() - 0.5) * 10;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 8;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 2;
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
+    const pMat = new THREE.PointsMaterial({ color: "#c9a961", size: 0.035, transparent: true, opacity: 0.45 });
+    const dustPoints = new THREE.Points(pGeo, pMat);
+    scene.add(dustPoints);
 
     // ── Lighting ───────────────────────────────────────────────────────
-    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambient);
-
-    const keyLight = new THREE.PointLight("#c9a961", 40, 12);
-    keyLight.position.set(3, 4, 4);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const keyLight = new THREE.PointLight("#dcd0b4", 50, 14);
+    keyLight.position.set(4, 5, 5);
     scene.add(keyLight);
-
-    const fillLight = new THREE.PointLight(0xffffff, 15, 10);
-    fillLight.position.set(-3, -2, 3);
+    const fillLight = new THREE.PointLight("#c9a961", 25, 10);
+    fillLight.position.set(-4, -2, 3);
     scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight("#dcd0b4", 0.6);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
     rimLight.position.set(-2, 3, -2);
     scene.add(rimLight);
 
-    // ── Progress ───────────────────────────────────────────────────────
+    // ── Fast progress (1.6 s) ──────────────────────────────────────────
     let prog = 0;
     const progInterval = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 4, 100);
+      prog = Math.min(prog + Math.random() * 9 + 3, 100);
       setProgress(Math.floor(prog));
       if (prog >= 100) clearInterval(progInterval);
-    }, 50);
+    }, 30);
 
-    // ── Auto-dismiss ───────────────────────────────────────────────────
     const dismissTimer = setTimeout(() => {
       setFading(true);
-      setTimeout(onComplete, 900);
-    }, 2800);
+      setTimeout(onComplete, 700);
+    }, 1600);
 
     // ── Animation loop ─────────────────────────────────────────────────
     let raf: number;
     let t = 0;
     const animate = () => {
       raf = requestAnimationFrame(animate);
-      t += 0.016;
+      t += 0.018;
 
-      // Stripe scroll upward + pole spin
-      poleTexture.offset.y -= 0.004;
-      pole.rotation.y += 0.008;
+      // Clipper float + blade buzz
+      clipperGroup.position.y = Math.sin(t * 1.2) * 0.12;
+      clipperGroup.rotation.z = Math.sin(t * 0.8) * 0.04;
+      movingBlade.position.x = Math.sin(t * 28) * 0.055;
 
-      // Gentle camera bob
-      camera.position.y = Math.sin(t * 0.4) * 0.08;
+      // Scissors open/close + float opposite phase
+      const openAngle = (Math.sin(t * 2.5) * 0.5 + 0.5) * 0.45;
+      bladeA.rotation.z = openAngle;
+      bladeB.rotation.z = -openAngle;
+      scissorsGroup.position.y = Math.sin(t * 1.2 + Math.PI) * 0.12;
 
-      // Particles drift
-      particles.rotation.y += 0.0015;
-
+      dustPoints.rotation.y += 0.003;
+      dustPoints.rotation.x += 0.001;
       renderer.render(scene, camera);
     };
     animate();
@@ -209,15 +190,10 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       clearInterval(progInterval);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
-      if (mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
-      }
+      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       renderer.dispose();
-      poleTexture.dispose();
-      poleGeo.dispose();
-      poleMat.dispose();
-      partGeo.dispose();
-      partMat.dispose();
+      [goldMat, darkMat, silverMat, chromeMat, pMat].forEach((m) => m.dispose());
+      pGeo.dispose();
     };
   }, [onComplete]);
 
@@ -229,28 +205,24 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
         zIndex: 9999,
         background: "#0f0f0f",
         opacity: fading ? 0 : 1,
-        transition: "opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
         pointerEvents: fading ? "none" : "all",
       }}
     >
-      {/* Three.js canvas mount */}
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
-
-      {/* Bottom overlay — brand + progress */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          padding: "0 0 10vh 0",
+          paddingBottom: "8vh",
+          paddingTop: 48,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 14,
-          background:
-            "linear-gradient(to top, rgba(15,15,15,0.95) 0%, transparent 100%)",
-          paddingTop: 48,
+          gap: 12,
+          background: "linear-gradient(to top, rgba(15,15,15,0.92) 0%, transparent 100%)",
         }}
       >
         {/* Wordmark */}
