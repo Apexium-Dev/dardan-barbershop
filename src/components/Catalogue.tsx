@@ -1,25 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { Clock } from "lucide-react";
 
 const catalogueStyles = `
-  /* Section wrapper */
   .catalogue-section {
     background-color: #0f0f0f;
-    padding: 120px 0 140px;
+    padding: 140px 0 160px;
     position: relative;
-    overflow: hidden;
   }
 
-  /* Subtle background texture lines */
   .catalogue-section::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(201, 169, 97, 0.3), transparent);
+    background: linear-gradient(to right, transparent, rgba(201, 169, 97, 0.25), transparent);
   }
 
   .catalogue-container {
@@ -29,439 +25,226 @@ const catalogueStyles = `
   }
 
   @media (max-width: 768px) {
-    .catalogue-container {
-      padding: 0 24px;
-    }
-    .catalogue-section {
-      padding: 80px 0 100px;
-    }
+    .catalogue-container { padding: 0 24px; }
+    .catalogue-section { padding: 96px 0 120px; }
   }
 
-  /* Header */
-  .catalogue-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 64px;
-    gap: 32px;
+  .catalogue-inner {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 80px;
+    align-items: start;
   }
 
-  @media (max-width: 768px) {
-    .catalogue-header {
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 48px;
-    }
+  @media (max-width: 1024px) {
+    .catalogue-inner { grid-template-columns: 1fr; gap: 56px; }
   }
 
-  .catalogue-header-left {
-    max-width: 540px;
+  .catalogue-left { position: sticky; top: 120px; }
+
+  @media (max-width: 1024px) {
+    .catalogue-left { position: static; }
   }
 
-  .catalogue-label {
+  .catalogue-eyebrow {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5em;
     color: #c9a961;
     font-weight: 700;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .catalogue-label::before {
+  .catalogue-eyebrow::before {
     content: '';
     display: inline-block;
-    width: 32px;
-    height: 1px;
+    width: 28px; height: 1px;
     background-color: #c9a961;
+    flex-shrink: 0;
   }
 
-  .catalogue-title {
-    font-size: clamp(32px, 4vw, 56px);
+  .catalogue-heading {
+    font-size: clamp(52px, 7vw, 88px);
     font-family: Georgia, serif;
     font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
     color: #ffffff;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    margin-bottom: 32px;
   }
 
-  .catalogue-title em {
+  .catalogue-heading em {
     color: #c9a961;
     font-style: italic;
+    display: block;
   }
 
-  .catalogue-subtitle {
+  .catalogue-divider {
+    width: 56px; height: 1px;
+    background-color: rgba(220, 208, 180, 0.25);
+    margin-bottom: 28px;
+  }
+
+  .catalogue-desc {
     font-size: 13px;
+    line-height: 1.75;
     color: rgba(255, 255, 255, 0.4);
-    line-height: 1.7;
-    max-width: 320px;
-    text-align: right;
+    font-weight: 300;
+    max-width: 280px;
   }
 
-  @media (max-width: 768px) {
-    .catalogue-subtitle {
-      text-align: left;
-    }
-  }
+  .catalogue-quality { margin-top: 48px; }
 
-  /* Category tabs */
-  .catalogue-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 48px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  }
-
-  .catalogue-tab {
-    font-size: 10px;
+  .catalogue-quality-label {
+    font-size: 9px;
     text-transform: uppercase;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.5em;
+    color: rgba(255, 255, 255, 0.2);
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.35);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 12px 24px 14px;
-    position: relative;
-    transition: color 250ms ease;
+    margin-bottom: 12px;
   }
 
-  .catalogue-tab::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background-color: #c9a961;
-    transform: scaleX(0);
-    transition: transform 250ms ease;
-  }
+  .catalogue-quality-dots { display: flex; gap: 8px; }
 
-  .catalogue-tab:hover {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  .catalogue-tab.active {
-    color: #ffffff;
-  }
-
-  .catalogue-tab.active::after {
-    transform: scaleX(1);
-  }
-
-  @media (max-width: 480px) {
-    .catalogue-tab {
-      padding: 12px 14px 14px;
-      font-size: 9px;
-    }
-  }
-
-  /* Services grid */
-  .catalogue-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    overflow: hidden;
+  .catalogue-quality-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 1px solid rgba(220, 208, 180, 0.2);
   }
 
   @media (max-width: 1024px) {
-    .catalogue-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    .catalogue-quality { display: none; }
   }
 
-  @media (max-width: 640px) {
-    .catalogue-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+  .catalogue-list { display: flex; flex-direction: column; }
 
-  /* Service card */
-  .service-card {
-    background-color: #111111;
-    padding: 36px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  .service-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 28px 0 32px;
     cursor: pointer;
-    transition: background-color 300ms ease;
-    position: relative;
-    overflow: hidden;
+    transition: border-color 300ms ease;
   }
 
-  .service-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(201, 169, 97, 0.4), transparent);
-    transform: scaleX(0);
-    transition: transform 400ms ease;
-  }
+  .service-row:first-child { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+  .service-row:hover { border-bottom-color: rgba(255, 255, 255, 0.22); }
 
-  .service-card:hover {
-    background-color: #161616;
-  }
-
-  .service-card:hover::before {
-    transform: scaleX(1);
-  }
-
-  .service-card-top {
+  .service-row-top {
     display: flex;
-    align-items: flex-start;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px;
+    margin-bottom: 12px;
   }
 
-  .service-card-number {
+  .service-row-left { display: flex; align-items: baseline; gap: 16px; }
+
+  .service-number {
     font-size: 10px;
-    color: rgba(201, 169, 97, 0.4);
+    font-family: monospace;
+    color: rgba(201, 169, 97, 0.3);
     font-weight: 700;
-    letter-spacing: 0.2em;
-    margin-top: 2px;
+    letter-spacing: 0.1em;
+    transition: color 250ms ease;
+    flex-shrink: 0;
   }
 
-  .service-card-duration {
+  .service-row:hover .service-number { color: rgba(201, 169, 97, 0.9); }
+
+  .service-name {
+    font-size: clamp(22px, 3.2vw, 36px);
+    font-family: Georgia, serif;
+    font-weight: 400;
+    color: #ffffff;
+    line-height: 1.1;
+    transition: transform 500ms ease;
+  }
+
+  .service-row:hover .service-name { transform: translateX(6px); }
+
+  .service-price {
+    font-size: clamp(16px, 2vw, 24px);
+    font-family: Georgia, serif;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+    transition: color 250ms ease;
+    flex-shrink: 0;
+  }
+
+  .service-row:hover .service-price { color: #c9a961; }
+
+  .service-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 34px;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    .service-row-bottom { padding-left: 26px; }
+  }
+
+  .service-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.28);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 380px;
+    transition: color 250ms ease;
+  }
+
+  .service-row:hover .service-desc { color: rgba(255, 255, 255, 0.6); }
+
+  .service-duration {
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .service-duration-text {
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.25);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-weight: 600;
-    background-color: rgba(255, 255, 255, 0.04);
-    padding: 4px 10px;
-    border-radius: 999px;
+    letter-spacing: 0.3em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.22);
     white-space: nowrap;
   }
 
-  .service-card-name {
-    font-size: 18px;
-    font-family: Georgia, serif;
-    color: #ffffff;
-    font-weight: 400;
-    line-height: 1.2;
+  @media (max-width: 640px) {
+    .service-duration { display: none; }
   }
 
-  .service-card-desc {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.35);
-    line-height: 1.7;
-    flex: 1;
-  }
-
-  .service-card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: auto;
-  }
-
-  .service-card-price {
-    font-size: 22px;
-    font-family: Georgia, serif;
-    color: #c9a961;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-  }
-
-  .service-card-price span {
-    font-size: 13px;
-    color: rgba(201, 169, 97, 0.6);
-    font-family: inherit;
-  }
-
-  .service-card-book-btn {
+  .catalogue-footer-note {
+    margin-top: 40px;
     font-size: 9px;
     text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.3);
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all 250ms ease;
+    letter-spacing: 0.4em;
+    color: rgba(255, 255, 255, 0.18);
+    text-align: right;
   }
 
-  .service-card:hover .service-card-book-btn {
-    border-color: #c9a961;
-    color: #c9a961;
-  }
-
-  /* Featured card (first one) */
-  .service-card.featured {
-    background-color: #141410;
-  }
-
-  .service-card.featured .service-card-name {
-    color: #f5f0e8;
-  }
-
-  /* Bottom CTA */
-  .catalogue-cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 56px;
-    flex-wrap: wrap;
-  }
-
-  .catalogue-cta-text {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 0.1em;
-  }
-
-  .catalogue-cta-btn {
-    background-color: #c9a961;
-    color: #0f0f0f;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-weight: 900;
-    padding: 16px 36px;
-    border-radius: 999px;
-    border: none;
-    cursor: pointer;
-    transition: all 300ms ease;
-  }
-
-  .catalogue-cta-btn:hover {
-    background-color: #dcd0b4;
-    transform: translateY(-2px);
+  @media (max-width: 1024px) {
+    .catalogue-footer-note { text-align: center; }
   }
 `;
 
-const services = {
-  cuts: [
-    {
-      name: "The Classic Cut",
-      desc: "A timeless scissor cut tailored to your natural shape. Clean lines, no shortcuts.",
-      price: "€15",
-      duration: "30 min",
-    },
-    {
-      name: "Skin Fade",
-      desc: "Zero to length — blended with precision. Surgical clean-up on the hairline.",
-      price: "€18",
-      duration: "40 min",
-    },
-    {
-      name: "Textured Crop",
-      desc: "Modern styling with weight removed from the ends. Effortlessly structured.",
-      price: "€18",
-      duration: "35 min",
-    },
-    {
-      name: "Taper Fade",
-      desc: "Gradual graduation from skin to length. Versatile enough for any occasion.",
-      price: "€20",
-      duration: "45 min",
-    },
-    {
-      name: "Curly Cut",
-      desc: "Cut dry to honor your curl pattern. Shape without sacrificing volume.",
-      price: "€22",
-      duration: "50 min",
-    },
-    {
-      name: "Kids Cut",
-      desc: "Patience first, scissors second. A comfortable, clean cut for the young ones.",
-      price: "€10",
-      duration: "25 min",
-    },
-  ],
-  beard: [
-    {
-      name: "Beard Shape",
-      desc: "Define your neckline and cheek line. Crisp edges that frame your face.",
-      price: "€10",
-      duration: "20 min",
-    },
-    {
-      name: "Hot Towel Shave",
-      desc: "Traditional straight razor shave with hot towel prep. Pure ritual.",
-      price: "€18",
-      duration: "30 min",
-    },
-    {
-      name: "Beard Trim",
-      desc: "Even length throughout with shape maintenance. Natural but groomed.",
-      price: "€12",
-      duration: "20 min",
-    },
-    {
-      name: "Full Beard Service",
-      desc: "Wash, condition, shape, trim, and hot towel finish. The complete experience.",
-      price: "€25",
-      duration: "45 min",
-    },
-    {
-      name: "Moustache Trim",
-      desc: "Precision styling above the lip. Sharp definition, clean shape.",
-      price: "€8",
-      duration: "15 min",
-    },
-    {
-      name: "Designer Lines",
-      desc: "Custom geometric lines and patterns. Art meets grooming.",
-      price: "€20",
-      duration: "30 min",
-    },
-  ],
-  combo: [
-    {
-      name: "Cut & Beard",
-      desc: "The full package — fresh cut and sculpted beard. Walk in, walk out transformed.",
-      price: "€28",
-      duration: "60 min",
-    },
-    {
-      name: "Cut & Hot Shave",
-      desc: "Haircut paired with a traditional straight razor shave. Timeless refinement.",
-      price: "€30",
-      duration: "65 min",
-    },
-    {
-      name: "The Ritual",
-      desc: "Cut, full beard service, hot towel, and scalp massage. Our signature experience.",
-      price: "€40",
-      duration: "90 min",
-    },
-    {
-      name: "Father & Son",
-      desc: "Two classic cuts together. A tradition worth passing down.",
-      price: "€22",
-      duration: "50 min",
-    },
-    {
-      name: "Cut & Style",
-      desc: "Haircut with product styling and finish. Ready for anything.",
-      price: "€22",
-      duration: "45 min",
-    },
-    {
-      name: "VIP Treatment",
-      desc: "Everything we do, done at once. Bring a book.",
-      price: "€55",
-      duration: "2 hrs",
-    },
-  ],
-};
-
-type Category = "cuts" | "beard" | "combo";
+const services = [
+  { name: "Haircut", price: "250 den", desc: "A clean, precise cut tailored to your head shape and style. No shortcuts taken.", duration: "30 min" },
+  { name: "Beard Trim", price: "150 den", desc: "Defined edges, even length, sculpted shape. Groomed but natural.", duration: "20 min" },
+  { name: "Hair Wash", price: "100 den", desc: "Thorough scalp cleanse with quality products. A clean foundation for every cut.", duration: "10 min" },
+  { name: "Eyebrows — Thread", price: "200 den", desc: "Precise eyebrow shaping using traditional threading technique for clean definition.", duration: "15 min" },
+  { name: "Eyebrows — Wax", price: "150 den", desc: "Quick and clean eyebrow shaping with wax. Smooth finish, sharp lines.", duration: "10 min" },
+  { name: "Nose & Ear Wax", price: "200 den", desc: "Hygienic removal of unwanted hair from nose and ears using warm wax.", duration: "15 min" },
+  { name: "Hair Bleach & Color", price: "1200 den", desc: "Full bleach process followed by your chosen color. Expertly handled from start to finish.", duration: "2+ hrs" },
+  { name: "Black Hair Coloring", price: "200 den", desc: "Restore rich, deep black color to your hair. Even application, lasting results.", duration: "45 min" },
+  { name: "Black Beard Coloring", price: "200 den", desc: "Deep black dye applied evenly to the beard. Looks fresh, stays sharp.", duration: "30 min" },
+  { name: "Black Hair & Beard", price: "400 den", desc: "Combined hair and beard coloring in black. Full, unified look in one session.", duration: "60 min" },
+  { name: "Mask & Steam Treatment", price: "300 den", desc: "Deep conditioning mask applied under steam for maximum absorption and softness.", duration: "30 min" },
+];
 
 interface CatalogueProps {
   startBooking: () => void;
@@ -469,84 +252,57 @@ interface CatalogueProps {
 }
 
 export const Catalogue = ({ startBooking }: CatalogueProps) => {
-  const [activeTab, setActiveTab] = useState<Category>("cuts");
-
-  const tabs: { key: Category; label: string }[] = [
-    { key: "cuts", label: "Haircuts" },
-    { key: "beard", label: "Beard" },
-    { key: "combo", label: "Combos" },
-  ];
-
   return (
     <>
       <style>{catalogueStyles}</style>
       <section id="menu" className="catalogue-section">
         <div className="catalogue-container">
-          {/* Header */}
-          <div className="catalogue-header">
-            <div className="catalogue-header-left">
-              <p className="catalogue-label">The Catalogue</p>
-              <h2 className="catalogue-title">
-                Every service,<br />
-                <em>done right.</em>
+          <div className="catalogue-inner">
+            <div className="catalogue-left">
+              <p className="catalogue-eyebrow">The Catalogue</p>
+              <h2 className="catalogue-heading">
+                The
+                <em>Catalogue.</em>
               </h2>
-            </div>
-            <p className="catalogue-subtitle">
-              No gimmicks, no upsells. Just skilled hands and honest prices — the way it should be.
-            </p>
-          </div>
-
-          {/* Tabs */}
-          <div className="catalogue-tabs">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                className={`catalogue-tab ${activeTab === tab.key ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Grid */}
-          <div className="catalogue-grid">
-            {services[activeTab].map((service, i) => (
-              <div
-                key={i}
-                className={`service-card ${i === 0 ? "featured" : ""}`}
-              >
-                <div className="service-card-top">
-                  <span className="service-card-number">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="service-card-duration">
-                    {service.duration}
-                  </span>
-                </div>
-                <h3 className="service-card-name">{service.name}</h3>
-                <p className="service-card-desc">{service.desc}</p>
-                <div className="service-card-footer">
-                  <span className="service-card-price">
-                    {service.price} <span>/ session</span>
-                  </span>
-                  <button
-                    className="service-card-book-btn"
-                    onClick={() => startBooking()}
-                  >
-                    Book
-                  </button>
+              <div className="catalogue-divider" />
+              <p className="catalogue-desc">
+                A curated selection of grooming excellence. Each session is a tailored experience crafted to your structure and style.
+              </p>
+              <div className="catalogue-quality">
+                <p className="catalogue-quality-label">Quality Assurance</p>
+                <div className="catalogue-quality-dots">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="catalogue-quality-dot" />
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Bottom CTA */}
-          <div className="catalogue-cta">
-            <span className="catalogue-cta-text">Ready to get started?</span>
-            <button className="catalogue-cta-btn" onClick={() => startBooking()}>
-              Book Your Appointment
-            </button>
+            <div>
+              <div className="catalogue-list">
+                {services.map((s, i) => (
+                  <div key={s.name} className="service-row" onClick={() => startBooking()}>
+                    <div className="service-row-top">
+                      <div className="service-row-left">
+                        <span className="service-number">{String(i + 1).padStart(2, "0")}</span>
+                        <h3 className="service-name">{s.name}</h3>
+                      </div>
+                      <span className="service-price">{s.price}</span>
+                    </div>
+                    <div className="service-row-bottom">
+                      <p className="service-desc">{s.desc}</p>
+                      <div className="service-duration">
+                        <Clock size={13} />
+                        <span className="service-duration-text">{s.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="catalogue-footer-note">
+                Consultations are complimentary with every service.
+              </p>
+            </div>
           </div>
         </div>
       </section>
