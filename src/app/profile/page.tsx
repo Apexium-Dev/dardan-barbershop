@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const qrRef = useRef<HTMLCanvasElement>(null);
 
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string>("member");
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -27,7 +28,7 @@ export default function ProfilePage() {
   const [phoneFocused, setPhoneFocused] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.push("/auth");
         return;
@@ -37,19 +38,27 @@ export default function ProfilePage() {
       setFirstName(u.user_metadata?.first_name ?? "");
       setLastName(u.user_metadata?.last_name ?? "");
       setPhone(u.user_metadata?.phone?.replace("+389", "") ?? "");
+      // Fetch role from profiles table
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", u.id)
+        .single();
+      if (profile?.role) setRole(profile.role);
       setLoading(false);
     });
   }, [router]);
 
-  // Generate QR code once user is loaded
+  // Generate QR code once user is loaded (members only)
   useEffect(() => {
     if (!user || !qrRef.current) return;
+    if (role === "barber") return;
     QRCode.toCanvas(qrRef.current, `dardan-barbershop:user:${user.id}`, {
       width: 180,
       margin: 2,
       color: { dark: "#c9a961", light: "#0f0f0f" },
     });
-  }, [user]);
+  }, [user, role]);
 
   const handleSave = async () => {
     setSaveMsg("");
@@ -183,16 +192,40 @@ export default function ProfilePage() {
             </div>
 
             <h2 style={s.displayName}>{displayName}</h2>
-            <p style={s.memberLabel}>Dardan Barbershop Member</p>
+            <p style={s.memberLabel}>
+              {role === "barber"
+                ? "Dardan Barbershop — Barber"
+                : "Dardan Barbershop Member"}
+            </p>
 
             <div style={s.divider} />
 
-            {/* QR Code */}
-            <p style={s.qrLabel}>YOUR MEMBER CODE</p>
-            <div style={s.qrWrap}>
-              <canvas ref={qrRef} style={{ borderRadius: 8 }} />
-            </div>
-            <p style={s.qrHint}>Show this at the barbershop</p>
+            {/* Role-based panel */}
+            {role === "barber" ? (
+              <>
+                <p style={s.qrLabel}>BARBER TOOLS</p>
+                <button
+                  style={s.scanBtn}
+                  onClick={() => router.push("/barber")}
+                >
+                  <span
+                    style={{ fontSize: 28, display: "block", marginBottom: 8 }}
+                  >
+                    📷
+                  </span>
+                  Scan Member QR
+                </button>
+                <p style={s.qrHint}>Open the scanner to log a visit</p>
+              </>
+            ) : (
+              <>
+                <p style={s.qrLabel}>YOUR MEMBER CODE</p>
+                <div style={s.qrWrap}>
+                  <canvas ref={qrRef} style={{ borderRadius: 8 }} />
+                </div>
+                <p style={s.qrHint}>Show this at the barbershop</p>
+              </>
+            )}
 
             <div style={s.divider} />
 
@@ -479,6 +512,21 @@ const s: Record<string, React.CSSProperties> = {
     height: 1,
     background: "rgba(255,255,255,0.07)",
     margin: "24px 0",
+  },
+  scanBtn: {
+    width: "100%",
+    padding: "24px 16px",
+    border: "1px solid rgba(201,169,97,0.3)",
+    borderRadius: 8,
+    background: "rgba(201,169,97,0.07)",
+    color: "#c9a961",
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    cursor: "pointer",
+    textTransform: "uppercase" as const,
+    transition: "all 200ms",
+    marginBottom: 8,
   },
   qrLabel: {
     fontSize: 9,
