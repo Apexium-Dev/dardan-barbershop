@@ -279,7 +279,7 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
 
       <div className="hero-image-container">
         <Image
-          src="/photo1.png"
+          src="/shop.jpg"
           alt="Barbershop Atmosphere"
           fill
           priority
