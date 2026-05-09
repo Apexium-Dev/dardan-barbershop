@@ -41,8 +41,8 @@ export default function Home() {
         />
         <Hero
           t={{
-            heroTitle: "Precision Craftsmanship",
-            heroSubtitle: "In Every Cut",
+            heroTitle: "Precision in",
+            heroSubtitle: "Every Detail.",
             memberPortal: "Member Portal",
             bookNow: "Book Now",
           }}

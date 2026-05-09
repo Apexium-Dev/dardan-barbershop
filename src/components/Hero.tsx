@@ -260,7 +260,7 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
         </motion.div>
 
         <h1 className="hero-title">
-          {t.heroTitle} <br />
+          {t.heroTitle}{" "}
           <span className="hero-title-highlight">{t.heroSubtitle}</span>
         </h1>
 
@@ -290,8 +290,8 @@ export const Hero = ({ t, startBooking, setView }: HeroProps) => (
         />
         <div className="hero-image-overlay"></div>
         <div className="hero-quote">
-          &ldquo;Heritage is earned,{" "}
-          <span className="hero-quote-highlight">Style is chosen.&rdquo;</span>
+          &ldquo;Precision in{" "}
+          <span className="hero-quote-highlight">Every Move.&rdquo;</span>
         </div>
       </div>
     </section>

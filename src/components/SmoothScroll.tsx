@@ -6,8 +6,8 @@ import Lenis from "lenis";
 export const SmoothScroll = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 0.75,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
       smoothWheel: true,
     });
 
@@ -19,7 +19,7 @@ export const SmoothScroll = ({ children }: { children: React.ReactNode }) => {
       e.preventDefault();
       const id = anchor.getAttribute("href")!.slice(1);
       const el = document.getElementById(id);
-      if (el) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+      if (el) lenis.scrollTo(el, { offset: -80, duration: 0.9 });
     };
 
     document.addEventListener("click", handleAnchorClick);
