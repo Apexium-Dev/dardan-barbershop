@@ -21,7 +21,7 @@ const heroStyles = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 32px 56px;
+    padding: 32px 48px 32px clamp(56px, 8vw, 120px);
   }
 
   @media (max-width: 1024px) {
