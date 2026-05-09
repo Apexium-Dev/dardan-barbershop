@@ -11,18 +11,6 @@ const team = [
     bio: "With nearly two decades of experience, Dardan built this shop from the ground up on a single principle — every client deserves the very best.",
     img: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=800",
   },
-  {
-    name: "Arber",
-    role: "Senior Barber",
-    bio: "Arber specialises in precision fades and modern cuts, blending classic technique with contemporary style.",
-    img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    name: "Faton",
-    role: "Barber & Colourist",
-    bio: "Faton's eye for colour and detail makes him the go-to for transformations — from bleach work to beard sculpting.",
-    img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=800",
-  },
 ];
 
 const craftsmenStyles = `
@@ -83,8 +71,9 @@ const craftsmenStyles = `
   /* Grid */
   .craftsmen-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 48px;
+    max-width: 420px;
   }
 
   /* Card */
@@ -215,7 +204,7 @@ export const Craftsmen = () => (
         <div className="craftsmen-divider" />
 
         {/* Grid */}
-        <div className="craftsmen-grid">
+        <div className="craftsmen-grid" style={{ margin: "0 auto" }}>
           {team.map((member, i) => (
             <motion.div
               key={member.name}
