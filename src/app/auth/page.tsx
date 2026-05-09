@@ -3,13 +3,105 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type View = "login" | "register" | "forgot";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [view, setView] = useState<View>("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // UI state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const clearMessages = () => {
+    setError("");
+    setSuccess("");
+  };
+
+  const handleLogin = async () => {
+    clearMessages();
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setLoading(true);
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    setLoading(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    router.push("/");
+  };
+
+  const handleRegister = async () => {
+    clearMessages();
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    setLoading(true);
+    const { error: err } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone ? `+389${phone}` : "",
+        },
+      },
+    });
+    setLoading(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setSuccess("Account created! Check your email to confirm your address.");
+  };
+
+  const handleForgot = async () => {
+    clearMessages();
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+    setLoading(true);
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setLoading(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setSuccess("Reset link sent! Check your inbox.");
+  };
 
   return (
     <div style={styles.root}>
@@ -59,10 +151,15 @@ export default function AuthPage() {
             </h1>
             <div style={styles.divider} />
 
+            {error && <p style={styles.errorMsg}>{error}</p>}
+            {success && <p style={styles.successMsg}>{success}</p>}
+
             <label style={styles.label}>Email</label>
             <input
               type="email"
               placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
               onBlur={(e) =>
@@ -75,6 +172,9 @@ export default function AuthPage() {
               <input
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
                 onBlur={(e) =>
@@ -92,21 +192,32 @@ export default function AuthPage() {
 
             <button
               style={styles.forgotBtn}
-              onClick={() => setView("forgot")}
+              onClick={() => {
+                clearMessages();
+                setView("forgot");
+              }}
               type="button"
             >
               Forgot password?
             </button>
 
-            <button style={styles.primary} type="button">
-              Sign In
+            <button
+              style={{ ...styles.primary, opacity: loading ? 0.6 : 1 }}
+              onClick={handleLogin}
+              type="button"
+              disabled={loading}
+            >
+              {loading ? "Signing in…" : "Sign In"}
             </button>
 
             <p style={styles.switchText}>
               Don&apos;t have an account?{" "}
               <button
                 style={styles.switchLink}
-                onClick={() => setView("register")}
+                onClick={() => {
+                  clearMessages();
+                  setView("register");
+                }}
                 type="button"
               >
                 Create one
@@ -124,12 +235,17 @@ export default function AuthPage() {
             </h1>
             <div style={styles.divider} />
 
+            {error && <p style={styles.errorMsg}>{error}</p>}
+            {success && <p style={styles.successMsg}>{success}</p>}
+
             <div style={styles.row}>
               <div style={{ flex: 1 }}>
                 <label style={styles.label}>First Name</label>
                 <input
                   type="text"
-                  placeholder="Dardan"
+                  placeholder="Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   style={{ ...styles.input, marginBottom: 0 }}
                   onFocus={(e) =>
                     (e.currentTarget.style.borderColor = "#c9a961")
@@ -144,7 +260,9 @@ export default function AuthPage() {
                 <label style={styles.label}>Last Name</label>
                 <input
                   type="text"
-                  placeholder="Alimi"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   style={{ ...styles.input, marginBottom: 0 }}
                   onFocus={(e) =>
                     (e.currentTarget.style.borderColor = "#c9a961")
@@ -158,20 +276,36 @@ export default function AuthPage() {
             </div>
 
             <label style={{ ...styles.label, marginTop: 18 }}>Phone</label>
-            <input
-              type="tel"
-              placeholder="+389 70 000 000"
-              style={styles.input}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
-              onBlur={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
-              }
-            />
+            <div style={styles.phoneWrap}>
+              <span style={styles.phonePrefix}>🇲🇰 +389</span>
+              <input
+                type="tel"
+                placeholder="70 000 000"
+                value={phone}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/[^0-9 ]/g, "");
+                  setPhone(digits);
+                }}
+                style={{
+                  ...styles.input,
+                  marginBottom: 0,
+                  borderLeft: "none",
+                  borderRadius: "0 4px 4px 0",
+                  flex: 1,
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+                }
+              />
+            </div>
 
             <label style={{ ...styles.label, marginTop: 18 }}>Email</label>
             <input
               type="email"
               placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
               onBlur={(e) =>
@@ -184,6 +318,8 @@ export default function AuthPage() {
               <input
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
                 onBlur={(e) =>
@@ -206,6 +342,8 @@ export default function AuthPage() {
               <input
                 type={showConfirm ? "text" : "password"}
                 placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 style={{ ...styles.input, marginBottom: 0, paddingRight: 48 }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
                 onBlur={(e) =>
@@ -233,15 +371,23 @@ export default function AuthPage() {
               .
             </p>
 
-            <button style={styles.primary} type="button">
-              Create Account
+            <button
+              style={{ ...styles.primary, opacity: loading ? 0.6 : 1 }}
+              onClick={handleRegister}
+              type="button"
+              disabled={loading}
+            >
+              {loading ? "Creating account…" : "Create Account"}
             </button>
 
             <p style={styles.switchText}>
               Already have an account?{" "}
               <button
                 style={styles.switchLink}
-                onClick={() => setView("login")}
+                onClick={() => {
+                  clearMessages();
+                  setView("login");
+                }}
                 type="button"
               >
                 Sign in
@@ -259,6 +405,9 @@ export default function AuthPage() {
             </h1>
             <div style={styles.divider} />
 
+            {error && <p style={styles.errorMsg}>{error}</p>}
+            {success && <p style={styles.successMsg}>{success}</p>}
+
             <p style={styles.hint}>
               Enter the email address linked to your account and we&apos;ll send
               you a reset link.
@@ -268,6 +417,8 @@ export default function AuthPage() {
             <input
               type="email"
               placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
               onBlur={(e) =>
@@ -275,13 +426,21 @@ export default function AuthPage() {
               }
             />
 
-            <button style={styles.primary} type="button">
-              Send Reset Link
+            <button
+              style={{ ...styles.primary, opacity: loading ? 0.6 : 1 }}
+              onClick={handleForgot}
+              type="button"
+              disabled={loading}
+            >
+              {loading ? "Sending…" : "Send Reset Link"}
             </button>
 
             <button
               style={styles.backBtn}
-              onClick={() => setView("login")}
+              onClick={() => {
+                clearMessages();
+                setView("login");
+              }}
               type="button"
             >
               <BackArrow /> Back to Sign In
@@ -336,6 +495,48 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "40px 40px 36px",
     backdropFilter: "blur(18px)",
     boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)",
+  },
+  phoneWrap: {
+    display: "flex",
+    alignItems: "stretch",
+    marginBottom: 0,
+    height: 48,
+  },
+  phonePrefix: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 14px",
+    background: "rgba(201,169,97,0.08)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRight: "none",
+    borderRadius: "4px 0 0 4px",
+    color: "#c9a961",
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    whiteSpace: "nowrap" as const,
+    userSelect: "none" as const,
+    lineHeight: 1,
+    gap: 6,
+  },
+  errorMsg: {
+    background: "rgba(220,60,60,0.12)",
+    border: "1px solid rgba(220,60,60,0.3)",
+    color: "#f87171",
+    fontSize: 13,
+    padding: "10px 14px",
+    borderRadius: 4,
+    marginBottom: 16,
+  },
+  successMsg: {
+    background: "rgba(60,180,100,0.12)",
+    border: "1px solid rgba(60,180,100,0.3)",
+    color: "#6ee7a0",
+    fontSize: 13,
+    padding: "10px 14px",
+    borderRadius: 4,
+    marginBottom: 16,
   },
   logoWrap: {
     display: "flex",
