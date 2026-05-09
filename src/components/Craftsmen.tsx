@@ -9,7 +9,7 @@ const team = [
     name: "Dardan",
     role: "Master Barber & Founder",
     bio: "With nearly two decades of experience, Dardan built this shop from the ground up on a single principle — every client deserves the very best.",
-    img: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=800",
+    img: "/barber.png",
   },
 ];
 
