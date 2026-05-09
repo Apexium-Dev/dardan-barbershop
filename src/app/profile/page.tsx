@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -11,8 +11,6 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const qrRef = useRef<HTMLCanvasElement>(null);
-
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string>("member");
   const [loading, setLoading] = useState(true);
@@ -49,16 +47,15 @@ export default function ProfilePage() {
     });
   }, [router]);
 
-  // Generate QR code once user is loaded (members only)
-  useEffect(() => {
-    if (!user || !qrRef.current) return;
-    if (role === "barber") return;
-    QRCode.toCanvas(qrRef.current, `dardan-barbershop:user:${user.id}`, {
+  // Callback ref — fires the moment the canvas element mounts in the DOM
+  const qrCanvasRef = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas || !user) return;
+    QRCode.toCanvas(canvas, `dardan-barbershop:user:${user.id}`, {
       width: 180,
       margin: 2,
       color: { dark: "#c9a961", light: "#0f0f0f" },
     });
-  }, [user, role]);
+  };
 
   const handleSave = async () => {
     setSaveMsg("");
@@ -221,7 +218,7 @@ export default function ProfilePage() {
               <>
                 <p style={s.qrLabel}>YOUR MEMBER CODE</p>
                 <div style={s.qrWrap}>
-                  <canvas ref={qrRef} style={{ borderRadius: 8 }} />
+                  <canvas ref={qrCanvasRef} style={{ borderRadius: 8 }} />
                 </div>
                 <p style={s.qrHint}>Show this at the barbershop</p>
               </>
