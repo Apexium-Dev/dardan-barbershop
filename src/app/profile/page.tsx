@@ -113,7 +113,45 @@ export default function ProfilePage() {
         }}
         startBooking={() => {}}
       />
-      <div style={s.root}>
+      <style>{`
+        .profile-page { padding: 48px 24px 80px; }
+        .profile-grid {
+          max-width: 960px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 280px 1fr;
+          gap: 32px;
+          align-items: start;
+        }
+        .profile-right { padding: 36px 40px 40px; }
+        .profile-fields {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px 24px;
+        }
+        .profile-card-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 4px;
+        }
+        @media (max-width: 768px) {
+          .profile-page { padding: 24px 16px 64px; }
+          .profile-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .profile-right { padding: 28px 20px 28px; }
+          .profile-fields {
+            grid-template-columns: 1fr;
+          }
+          .profile-card-header {
+            flex-direction: column;
+            gap: 12px;
+          }
+        }
+      `}</style>
+      <div style={s.root} className="profile-page">
         {/* Blobs */}
         <div
           style={{
@@ -135,7 +173,7 @@ export default function ProfilePage() {
           }}
         />
 
-        <div style={s.page}>
+        <div className="profile-grid">
           {/* ── Left panel ── */}
           <div style={s.leftPanel}>
             {/* Avatar */}
@@ -164,8 +202,8 @@ export default function ProfilePage() {
           </div>
 
           {/* ── Right panel ── */}
-          <div style={s.rightPanel}>
-            <div style={s.cardHeader}>
+          <div style={{ ...s.rightPanel }} className="profile-right">
+            <div className="profile-card-header">
               <div>
                 <p style={s.eyebrow}>Account</p>
                 <h1 style={s.title}>
@@ -192,7 +230,7 @@ export default function ProfilePage() {
             {saveError && <p style={s.errorMsg}>{saveError}</p>}
 
             {/* Fields */}
-            <div style={s.fieldsGrid}>
+            <div className="profile-fields">
               {/* First Name */}
               <div style={s.field}>
                 <label style={s.label}>First Name</label>
