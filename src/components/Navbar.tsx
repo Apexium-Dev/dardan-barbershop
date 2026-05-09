@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { User, Scan, Menu, X } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 // import { Language } from "../translations";
 
 type Language = "en" | "al" | "mk";
@@ -387,7 +388,18 @@ export const Navbar = ({
   startBooking,
 }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth
+      .getSession()
+      .then(({ data }) => setIsLoggedIn(!!data.session));
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) =>
+      setIsLoggedIn(!!session),
+    );
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   return (
     <>
@@ -450,9 +462,9 @@ export const Navbar = ({
             </button>
 
             <div className="navbar-auth">
-              {user ? (
+              {isLoggedIn ? (
                 <button
-                  onClick={() => setView("loyalty")}
+                  onClick={() => router.push("/profile")}
                   className="navbar-user-btn"
                 >
                   <User size={18} />
@@ -518,15 +530,15 @@ export const Navbar = ({
           </div>
 
           <div className="navbar-mobile-auth">
-            {user ? (
+            {isLoggedIn ? (
               <button
                 onClick={() => {
-                  setView("loyalty");
                   setMenuOpen(false);
+                  router.push("/profile");
                 }}
                 className="navbar-mobile-login-btn"
               >
-                {t.profile || "Profile"}
+                My Profile
               </button>
             ) : (
               <button
