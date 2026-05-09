@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [view, setView] = useState<View>("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
 
   // Form fields
   const [email, setEmail] = useState("");
@@ -276,8 +277,17 @@ export default function AuthPage() {
             </div>
 
             <label style={{ ...styles.label, marginTop: 18 }}>Phone</label>
-            <div style={styles.phoneWrap}>
-              <span style={styles.phonePrefix}>🇲🇰 +389</span>
+            <div
+              style={{
+                ...styles.phoneWrap,
+                borderRadius: 4,
+                border: `1px solid ${phoneFocused ? "#c9a961" : "rgba(255,255,255,0.1)"}`,
+                transition: "border-color 150ms",
+              }}
+            >
+              <span style={{ ...styles.phonePrefix, border: "none" }}>
+                🇲🇰 +389
+              </span>
               <input
                 type="tel"
                 placeholder="70 000 000"
@@ -289,14 +299,13 @@ export default function AuthPage() {
                 style={{
                   ...styles.input,
                   marginBottom: 0,
-                  borderLeft: "none",
+                  border: "none",
                   borderRadius: "0 4px 4px 0",
                   flex: 1,
+                  outline: "none",
                 }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
-                onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
-                }
+                onFocus={() => setPhoneFocused(true)}
+                onBlur={() => setPhoneFocused(false)}
               />
             </div>
 
