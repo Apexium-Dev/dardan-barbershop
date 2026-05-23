@@ -55,7 +55,7 @@ const navbarStyles = `
   .navbar-logo {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background: none;
     border: none;
     cursor: pointer;
@@ -63,12 +63,11 @@ const navbarStyles = `
     padding: 0;
     height: 40px;
     max-width: 140px;
+    width: 100%;
+    flex-shrink: 0;
   }
 
-  .navbar-logo img {
-    max-width: 100%;
-    height: auto;
-  }
+
 
   .navbar-logo:hover {
     opacity: 0.7;
@@ -426,9 +425,10 @@ export const Navbar = ({
               <Image
                 src="/logo.png"
                 alt="Dardan Barbershop"
-                width={90}
-                height={90}
-                style={{ height: "auto", width: "auto" }}
+                width={140}
+                height={40}
+                priority
+                style={{ height: 40, width: "auto", maxWidth: "100%", objectFit: "contain" }}
               />
             </button>
 
