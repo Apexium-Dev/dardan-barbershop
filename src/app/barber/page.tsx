@@ -63,7 +63,6 @@ export default function BarberPage() {
     const { data } = await supabase
       .from("visits")
       .select("id, scanned_at, notes, customer_email, customer_name")
-      .eq("barber_id", barberId)
       .order("scanned_at", { ascending: false })
       .limit(10);
     setRecentVisits(data ?? []);
@@ -75,7 +74,6 @@ export default function BarberPage() {
     setScanError("");
     setCustomer(null);
     setSavedMsg("");
-    setNotes("");
     setScanning(true);
 
     const { Html5Qrcode } = await import("html5-qrcode");
@@ -246,7 +244,7 @@ export default function BarberPage() {
 
             {!scanning && !customer && (
               <button style={s.primaryBtn} onClick={startScanner}>
-                {savedMsg ? "📷 Scan Next" : "📷 Start Camera"}
+                📷 Start Camera
               </button>
             )}
 

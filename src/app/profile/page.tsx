@@ -61,36 +61,21 @@ export default function ProfilePage() {
     setSaveMsg("");
     setSaveError("");
     setSaving(true);
-
-    const { error: authErr } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
       data: {
         first_name: firstName,
         last_name: lastName,
         phone: phone ? `+389${phone}` : "",
       },
     });
-    if (authErr) {
-      setSaving(false);
-      setSaveError(authErr.message);
-      return;
-    }
-
-    const { error: profileErr } = await supabase.from("profiles").upsert({
-      id: user!.id,
-      email: user!.email,
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone ? `+389${phone}` : "",
-    });
-    if (profileErr) {
-      setSaving(false);
-      setSaveError("Profile sync failed: " + profileErr.message);
-      return;
-    }
-
     setSaving(false);
+    if (error) {
+      setSaveError(error.message);
+      return;
+    }
     setSaveMsg("Profile updated.");
     setEditing(false);
+    // refresh user
     const { data } = await supabase.auth.getUser();
     if (data.user) setUser(data.user);
   };
