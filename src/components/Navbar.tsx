@@ -25,7 +25,13 @@ const navbarStyles = `
 
   @media (min-width: 768px) {
     .navbar {
-      padding: 20px 24px;
+      padding: 20px 32px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar {
+      padding: 14px 16px;
     }
   }
 
@@ -35,6 +41,7 @@ const navbarStyles = `
     display: flex;
     justify-content: space-between;
     align-items: center;
+    overflow: hidden;
   }
 
   /* Left section */
@@ -55,7 +62,12 @@ const navbarStyles = `
     transition: opacity 200ms ease;
     padding: 0;
     height: 40px;
-    width: auto;
+    max-width: 140px;
+  }
+
+  .navbar-logo img {
+    max-width: 100%;
+    height: auto;
   }
 
   .navbar-logo:hover {
