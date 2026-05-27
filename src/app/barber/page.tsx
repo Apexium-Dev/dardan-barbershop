@@ -22,6 +22,13 @@ interface Visit {
   notes: string | null;
   customer_email: string;
   customer_name: string;
+  is_redemption?: boolean;
+}
+
+interface LoyaltyInfo {
+  paidVisits: number;  // total non-free visits
+  available: number;   // free haircuts available to redeem
+  progress: number;    // 0–9, progress toward next reward
 }
 
 export default function BarberPage() {
@@ -39,6 +46,7 @@ export default function BarberPage() {
   const [recentVisits, setRecentVisits] = useState<Visit[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(true);
   const [barberId, setBarberId] = useState<string>("");
+  const [loyalty, setLoyalty] = useState<LoyaltyInfo | null>(null);
 
   // Auth check
   useEffect(() => {
@@ -62,11 +70,26 @@ export default function BarberPage() {
     setLoadingVisits(true);
     const { data } = await supabase
       .from("visits")
-      .select("id, scanned_at, notes, customer_email, customer_name")
+      .select("id, scanned_at, notes, customer_email, customer_name, is_redemption")
       .order("scanned_at", { ascending: false })
       .limit(10);
     setRecentVisits(data ?? []);
     setLoadingVisits(false);
+  };
+
+  const fetchLoyalty = async (userId: string) => {
+    const { data } = await supabase
+      .from("visits")
+      .select("is_redemption")
+      .eq("user_id", userId);
+    const paid = (data ?? []).filter((v) => !v.is_redemption).length;
+    const redeemed = (data ?? []).filter((v) => v.is_redemption).length;
+    const earned = Math.floor(paid / 10);
+    setLoyalty({
+      paidVisits: paid,
+      available: earned - redeemed,
+      progress: paid % 10,
+    });
   };
 
   // Start camera scanner
@@ -130,9 +153,10 @@ export default function BarberPage() {
       return;
     }
     setCustomer(data as CustomerInfo);
+    await fetchLoyalty(userId);
   };
 
-  const saveVisit = async () => {
+  const saveVisit = async (isRedemption = false) => {
     if (!customer || !barberId) return;
     setSaving(true);
     setSavedMsg("");
@@ -143,6 +167,7 @@ export default function BarberPage() {
       notes: notes.trim() || null,
       customer_email: customer.email,
       customer_name: `${customer.first_name} ${customer.last_name}`.trim(),
+      is_redemption: isRedemption,
     });
 
     setSaving(false);
@@ -150,9 +175,10 @@ export default function BarberPage() {
       setScanError("Save failed: " + error.message);
       return;
     }
-    setSavedMsg("✓ Visit saved!");
+    setSavedMsg(isRedemption ? "🎁 Free haircut redeemed!" : "✓ Visit saved!");
     setNotes("");
     setCustomer(null);
+    setLoyalty(null);
     loadVisits();
   };
 
@@ -204,6 +230,79 @@ export default function BarberPage() {
           .barber-grid { grid-template-columns: 1fr; }
           .barber-full { grid-column: 1; }
         }
+
+        .loyalty-block {
+          margin-top: 16px;
+          padding: 16px;
+          background: rgba(201,169,97,0.06);
+          border: 1px solid rgba(201,169,97,0.18);
+          border-radius: 6px;
+        }
+        .loyalty-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        .loyalty-label {
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.35em;
+          color: rgba(255,255,255,0.35);
+          font-weight: 700;
+        }
+        .loyalty-count {
+          font-size: 11px;
+          color: #c9a961;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+        }
+        .loyalty-dots {
+          display: flex;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .loyalty-dot {
+          flex: 1;
+          min-width: 18px;
+          height: 5px;
+          border-radius: 3px;
+          background: rgba(255,255,255,0.08);
+          transition: background 200ms;
+        }
+        .loyalty-dot.filled {
+          background: #c9a961;
+        }
+        .loyalty-free-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 10px;
+          padding: 6px 12px;
+          background: rgba(201,169,97,0.12);
+          border: 1px solid rgba(201,169,97,0.35);
+          border-radius: 20px;
+          font-size: 11px;
+          color: #c9a961;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+        }
+        .redeem-btn {
+          width: 100%;
+          margin-top: 12px;
+          padding: 13px 0;
+          border: 1px solid #c9a961;
+          border-radius: 4px;
+          background: rgba(201,169,97,0.1);
+          color: #c9a961;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background 200ms;
+        }
+        .redeem-btn:hover { background: rgba(201,169,97,0.2); }
       `}</style>
 
       <div className="barber-page" style={s.root}>
@@ -302,6 +401,30 @@ export default function BarberPage() {
               </div>
             )}
 
+            {customer && loyalty && (
+              <div className="loyalty-block">
+                <div className="loyalty-header">
+                  <span className="loyalty-label">Loyalty Progress</span>
+                  <span className="loyalty-count">
+                    {loyalty.progress} / 10
+                  </span>
+                </div>
+                <div className="loyalty-dots">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`loyalty-dot${i < loyalty.progress ? " filled" : ""}`}
+                    />
+                  ))}
+                </div>
+                {loyalty.available > 0 && (
+                  <div className="loyalty-free-badge">
+                    🎁 {loyalty.available} free haircut{loyalty.available > 1 ? "s" : ""} available
+                  </div>
+                )}
+              </div>
+            )}
+
             {customer && (
               <>
                 <label style={{ ...s.label, marginTop: 20 }}>
@@ -331,13 +454,23 @@ export default function BarberPage() {
                       opacity: saving ? 0.6 : 1,
                       flex: 1,
                     }}
-                    onClick={saveVisit}
+                    onClick={() => saveVisit(false)}
                     disabled={saving}
                     type="button"
                   >
                     {saving ? "Saving…" : "✓ Save Visit"}
                   </button>
                 </div>
+                {loyalty && loyalty.available > 0 && (
+                  <button
+                    className="redeem-btn"
+                    onClick={() => saveVisit(true)}
+                    disabled={saving}
+                    type="button"
+                  >
+                    🎁 Redeem Free Haircut
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -354,12 +487,27 @@ export default function BarberPage() {
 
             {recentVisits.map((v) => (
               <div key={v.id} style={s.visitRow}>
-                <div style={s.visitAvatar}>
-                  {v.customer_name?.[0]?.toUpperCase() ?? "?"}
+                <div style={{
+                  ...s.visitAvatar,
+                  background: v.is_redemption
+                    ? "rgba(201,169,97,0.25)"
+                    : "rgba(201,169,97,0.15)",
+                }}>
+                  {v.is_redemption ? "🎁" : (v.customer_name?.[0]?.toUpperCase() ?? "?")}
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={s.visitName}>
                     {v.customer_name || v.customer_email}
+                    {v.is_redemption && (
+                      <span style={{
+                        marginLeft: 8,
+                        fontSize: 9,
+                        letterSpacing: "0.15em",
+                        color: "#c9a961",
+                        textTransform: "uppercase",
+                        fontWeight: 700,
+                      }}>FREE</span>
+                    )}
                   </p>
                   {v.notes && <p style={s.visitNote}>{v.notes}</p>}
                   <p style={s.visitTime}>

@@ -24,6 +24,11 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneFocused, setPhoneFocused] = useState(false);
+  const [loyalty, setLoyalty] = useState<{
+    progress: number;
+    available: number;
+    paidVisits: number;
+  } | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -43,6 +48,23 @@ export default function ProfilePage() {
         .eq("id", u.id)
         .single();
       if (profile?.role) setRole(profile.role);
+
+      // Fetch loyalty stats
+      const { data: visits } = await supabase
+        .from("visits")
+        .select("is_redemption")
+        .eq("user_id", u.id);
+      if (visits) {
+        const paid = visits.filter((v) => !v.is_redemption).length;
+        const redeemed = visits.filter((v) => v.is_redemption).length;
+        const earned = Math.floor(paid / 10);
+        setLoyalty({
+          paidVisits: paid,
+          available: earned - redeemed,
+          progress: paid % 10,
+        });
+      }
+
       setLoading(false);
     });
   }, [router]);
@@ -221,6 +243,41 @@ export default function ProfilePage() {
                   <canvas ref={qrCanvasRef} style={{ borderRadius: 8 }} />
                 </div>
                 <p style={s.qrHint}>Show this at the barbershop</p>
+
+                {/* Loyalty card */}
+                {loyalty !== null && (
+                  <div style={s.loyaltyCard}>
+                    <div style={s.loyaltyHeader}>
+                      <span style={s.loyaltyLabel}>Loyalty</span>
+                      <span style={s.loyaltyCount}>
+                        {loyalty.progress} / 10
+                      </span>
+                    </div>
+                    <div style={s.loyaltyDots}>
+                      {Array.from({ length: 10 }).map((_, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            ...s.loyaltyDot,
+                            background:
+                              i < loyalty.progress
+                                ? "#c9a961"
+                                : "rgba(255,255,255,0.08)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {loyalty.available > 0 ? (
+                      <p style={s.loyaltyFree}>
+                        🎁 {loyalty.available} free haircut{loyalty.available > 1 ? "s" : ""} ready
+                      </p>
+                    ) : (
+                      <p style={s.loyaltyHint}>
+                        {10 - loyalty.progress} more to earn a free haircut
+                      </p>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
@@ -545,6 +602,54 @@ const s: Record<string, React.CSSProperties> = {
     color: "rgba(255,255,255,0.3)",
     marginTop: 10,
     letterSpacing: "0.05em",
+  },
+  loyaltyCard: {
+    width: "100%",
+    marginTop: 20,
+    padding: "14px 16px",
+    background: "rgba(201,169,97,0.06)",
+    border: "1px solid rgba(201,169,97,0.18)",
+    borderRadius: 8,
+  },
+  loyaltyHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  loyaltyLabel: {
+    fontSize: 9,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.35em",
+    color: "rgba(255,255,255,0.35)",
+    fontWeight: 700,
+  },
+  loyaltyCount: {
+    fontSize: 11,
+    color: "#c9a961",
+    fontWeight: 700,
+  },
+  loyaltyDots: {
+    display: "flex",
+    gap: 4,
+  },
+  loyaltyDot: {
+    flex: 1,
+    height: 5,
+    borderRadius: 3,
+  },
+  loyaltyFree: {
+    marginTop: 10,
+    fontSize: 11,
+    color: "#c9a961",
+    fontWeight: 700,
+    letterSpacing: "0.05em",
+  },
+  loyaltyHint: {
+    marginTop: 8,
+    fontSize: 10,
+    color: "rgba(255,255,255,0.25)",
+    letterSpacing: "0.04em",
   },
   signOutBtn: {
     width: "100%",
