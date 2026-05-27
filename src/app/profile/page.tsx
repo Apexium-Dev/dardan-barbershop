@@ -183,7 +183,7 @@ export default function ProfilePage() {
           login: "Login",
           bookNow: "Book Now",
         }}
-        startBooking={() => {}}
+        startBooking={() => router.push("/")}
       />
       <style>{`
         .profile-page { padding: 48px 24px 80px; }

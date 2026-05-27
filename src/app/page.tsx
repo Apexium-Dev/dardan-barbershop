@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Stats } from "@/components/Stats";
@@ -10,9 +11,28 @@ import { Craftsmen } from "@/components/Craftsmen";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [loaded, setLoaded] = useState(false);
+  const router = useRouter();
+
+  const startBooking = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      router.push("/profile");
+    } else {
+      router.push("/auth");
+    }
+  };
+
+  const setView = (view: string) => {
+    if (view === "loyalty" || view === "profile") {
+      router.push("/profile");
+    } else if (view === "admin") {
+      router.push("/barber");
+    }
+  };
 
   return (
     <>
@@ -28,7 +48,7 @@ export default function Home() {
         <Navbar
           lang="en"
           setLang={() => {}}
-          setView={() => {}}
+          setView={setView}
           user={null}
           userData={null}
           t={{
@@ -39,7 +59,7 @@ export default function Home() {
             login: "Login",
             bookNow: "Book Now",
           }}
-          startBooking={() => {}}
+          startBooking={startBooking}
         />
         <Hero
           t={{
@@ -48,11 +68,11 @@ export default function Home() {
             memberPortal: "Member Portal",
             bookNow: "Book Now",
           }}
-          startBooking={() => {}}
-          setView={() => {}}
+          startBooking={startBooking}
+          setView={setView}
         />
         <Stats />
-        <Catalogue startBooking={() => {}} />
+        <Catalogue startBooking={startBooking} />
         <Gallery />
         <Craftsmen />
         <Footer />

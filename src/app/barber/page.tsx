@@ -206,7 +206,7 @@ export default function BarberPage() {
           login: "Login",
           bookNow: "Book Now",
         }}
-        startBooking={() => {}}
+        startBooking={() => router.push("/")}
       />
       <style>{`
         .barber-page { padding: 48px 24px 80px; margin-top: 80px; }

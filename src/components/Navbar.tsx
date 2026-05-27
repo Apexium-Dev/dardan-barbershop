@@ -406,7 +406,7 @@ export const Navbar = ({
         <div className="navbar-container">
           <div className="navbar-left">
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={() => router.push("/")}
               className="navbar-logo"
             >
               <Image
@@ -432,13 +432,13 @@ export const Navbar = ({
               </div>
 
               <div className="navbar-links">
-                <a href="#menu" className="navbar-link">
+                <a href="/#menu" className="navbar-link">
                   {t.theCatalogue}
                 </a>
-                <a href="#barbers" className="navbar-link">
+                <a href="/#barbers" className="navbar-link">
                   {t.theCraftsmen}
                 </a>
-                <a href="#info" className="navbar-link">
+                <a href="/#info" className="navbar-link">
                   {t.location}
                 </a>
               </div>
@@ -505,21 +505,21 @@ export const Navbar = ({
 
           <div className="navbar-mobile-links">
             <a
-              href="#menu"
+              href="/#menu"
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
               {t.theCatalogue}
             </a>
             <a
-              href="#barbers"
+              href="/#barbers"
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
               {t.theCraftsmen}
             </a>
             <a
-              href="#info"
+              href="/#info"
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
