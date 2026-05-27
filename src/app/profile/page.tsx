@@ -208,19 +208,26 @@ export default function ProfilePage() {
           margin-bottom: 4px;
         }
         @media (max-width: 768px) {
-          .profile-page { padding: 24px 16px 64px; }
+          .profile-page { padding: 20px 12px 56px; margin-top: 72px !important; }
           .profile-grid {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 16px;
           }
-          .profile-right { padding: 28px 20px 28px; }
+          .profile-right { padding: 22px 16px 24px; }
           .profile-fields {
             grid-template-columns: 1fr;
+            gap: 16px 0;
           }
           .profile-card-header {
             flex-direction: column;
             gap: 12px;
           }
+          .profile-left-panel {
+            padding: 24px 20px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .profile-page { padding: 16px 10px 48px; }
         }
       `}</style>
       <div style={s.root} className="profile-page">
@@ -247,7 +254,7 @@ export default function ProfilePage() {
 
         <div className="profile-grid">
           {/* ── Left panel ── */}
-          <div style={s.leftPanel}>
+          <div style={s.leftPanel} className="profile-left-panel">
             {/* Avatar */}
             <div style={s.avatarWrap}>
               <div style={s.avatar}>{initials}</div>

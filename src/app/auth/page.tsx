@@ -106,6 +106,12 @@ export default function AuthPage() {
 
   return (
     <div style={styles.root}>
+      <style>{`
+        @media (max-width: 480px) {
+          .auth-card { padding: 28px 20px 24px !important; }
+          .auth-name-row { flex-direction: column !important; gap: 14px !important; }
+        }
+      `}</style>
       {/* ── Background grain overlay ── */}
       <div style={styles.grain} />
 
@@ -131,7 +137,7 @@ export default function AuthPage() {
       />
 
       {/* ── Card ── */}
-      <div style={styles.card}>
+      <div style={styles.card} className="auth-card">
         {/* Logo */}
         <Link href="/" style={styles.logoWrap}>
           <Image
@@ -239,7 +245,7 @@ export default function AuthPage() {
             {error && <p style={styles.errorMsg}>{error}</p>}
             {success && <p style={styles.successMsg}>{success}</p>}
 
-            <div style={styles.row}>
+            <div style={styles.row} className="auth-name-row">
               <div style={{ flex: 1 }}>
                 <label style={styles.label}>First Name</label>
                 <input

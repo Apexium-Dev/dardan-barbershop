@@ -84,7 +84,15 @@ const statsStyles = `
 
   @media (max-width: 480px) {
     .stats-item {
-      padding: 32px 16px;
+      padding: 28px 12px;
+    }
+    .stats-number {
+      font-size: clamp(28px, 8vw, 40px);
+      margin-bottom: 8px;
+    }
+    .stats-label {
+      font-size: 8px;
+      letter-spacing: 0.25em;
     }
   }
 `;

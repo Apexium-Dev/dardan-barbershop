@@ -174,16 +174,26 @@ const craftsmenStyles = `
 
   @media (max-width: 640px) {
     .craftsmen-section {
-      padding: 48px 20px 64px;
+      padding: 48px 16px 56px;
+    }
+
+    .craftsmen-title {
+      font-size: clamp(38px, 11vw, 64px);
     }
 
     .craftsmen-grid {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 32px;
+      max-width: 100%;
     }
 
     .craftsmen-divider {
-      margin: 24px 0 48px 0;
+      margin: 20px 0 36px 0;
+    }
+
+    .craftsmen-image-wrapper {
+      aspect-ratio: 4/3;
+      border-radius: 14px;
     }
   }
 `;

@@ -103,9 +103,13 @@ const galleryStyles = `
   }
 
   @media (max-width: 640px) {
+    .gallery-section { padding: 48px 16px 64px; }
+    .gallery-header { margin-bottom: 24px; }
+    .gallery-title { font-size: clamp(34px, 9vw, 48px); }
     .gallery-grid {
-      grid-template-columns: 1fr;
-      grid-template-rows: repeat(5, 220px);
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 160px 160px;
+      gap: 10px;
     }
   }
 
@@ -150,7 +154,7 @@ const galleryStyles = `
     .gallery-cell-2,
     .gallery-cell-3,
     .gallery-cell-4 {
-      grid-column: 1;
+      grid-column: auto;
       grid-row: auto;
     }
   }

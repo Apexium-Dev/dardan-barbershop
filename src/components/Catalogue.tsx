@@ -25,8 +25,13 @@ const catalogueStyles = `
   }
 
   @media (max-width: 768px) {
-    .catalogue-container { padding: 0 24px; }
-    .catalogue-section { padding: 96px 0 120px; }
+    .catalogue-container { padding: 0 16px; }
+    .catalogue-section { padding: 64px 0 80px; }
+  }
+  @media (max-width: 480px) {
+    .catalogue-section { padding: 48px 0 64px; }
+    .catalogue-heading { font-size: clamp(40px, 12vw, 64px); margin-bottom: 20px; }
+    .catalogue-desc { max-width: 100%; }
   }
 
   .catalogue-inner {
@@ -123,9 +128,12 @@ const catalogueStyles = `
 
   .service-row {
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    padding: 28px 0 32px;
+    padding: 20px 0 24px;
     cursor: pointer;
     transition: border-color 300ms ease;
+  }
+  @media (min-width: 768px) {
+    .service-row { padding: 28px 0 32px; }
   }
 
   .service-row:first-child { border-top: 1px solid rgba(255, 255, 255, 0.07); }

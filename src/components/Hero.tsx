@@ -31,7 +31,7 @@ const heroStyles = `
       overflow: hidden;
     }
     .hero-content {
-      padding: 48px 24px 32px;
+      padding: 40px 20px 28px;
       align-items: center;
       text-align: center;
     }
@@ -39,7 +39,17 @@ const heroStyles = `
 
   @media (max-width: 480px) {
     .hero-content {
-      padding: 36px 20px 24px;
+      padding: 28px 16px 20px;
+    }
+    .hero-buttons {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    .hero-book-btn,
+    .hero-member-btn {
+      width: 100%;
+      justify-content: center;
     }
   }
 
@@ -167,18 +177,18 @@ const heroStyles = `
 
   @media (max-width: 1024px) {
     .hero-image-container {
-      height: 320px;
+      height: 300px;
       flex: none;
-      margin: 0 24px 0;
-      border-radius: 24px 24px 0 0;
+      margin: 0 16px 0;
+      border-radius: 20px 20px 0 0;
     }
   }
 
   @media (max-width: 480px) {
     .hero-image-container {
-      height: 260px;
-      margin: 0 16px 0;
-      border-radius: 20px 20px 0 0;
+      height: 240px;
+      margin: 0 12px 0;
+      border-radius: 16px 16px 0 0;
     }
   }
 

@@ -229,16 +229,23 @@ const footerStyles = `
   @media (max-width: 640px) {
     .footer-top {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 32px;
+      padding-bottom: 36px;
+      margin-bottom: 24px;
     }
 
     .footer {
-      padding: 56px 20px 28px;
+      padding: 44px 16px 24px;
     }
 
     .footer-bottom {
       flex-direction: column;
       align-items: flex-start;
+      gap: 10px;
+    }
+
+    .footer-bottom-links {
+      flex-wrap: wrap;
       gap: 12px;
     }
   }
