@@ -30,8 +30,6 @@ const navbarStyles = `
   }
 
   .navbar-container {
-    max-width: 80rem;
-    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;

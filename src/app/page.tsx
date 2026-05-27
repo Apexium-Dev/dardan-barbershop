@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
+import { Stats } from "@/components/Stats";
 import { Catalogue } from "@/components/Catalogue";
+import { Gallery } from "@/components/Gallery";
 import { Craftsmen } from "@/components/Craftsmen";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -49,7 +51,9 @@ export default function Home() {
           startBooking={() => {}}
           setView={() => {}}
         />
+        <Stats />
         <Catalogue startBooking={() => {}} />
+        <Gallery />
         <Craftsmen />
         <Footer />
         <ScrollToTop />

@@ -24,14 +24,16 @@ export const SmoothScroll = ({ children }: { children: React.ReactNode }) => {
 
     document.addEventListener("click", handleAnchorClick);
 
+    let rafId: number;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
       document.removeEventListener("click", handleAnchorClick);
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);
