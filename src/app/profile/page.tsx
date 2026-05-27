@@ -69,6 +69,43 @@ export default function ProfilePage() {
     });
   }, [router]);
 
+  // Real-time loyalty refresh — fires whenever a new visit is logged for this user
+  useEffect(() => {
+    if (!user) return;
+
+    const refreshLoyalty = async () => {
+      const { data: visits } = await supabase
+        .from("visits")
+        .select("is_redemption")
+        .eq("user_id", user.id);
+      if (!visits) return;
+      const paid = visits.filter((v) => !v.is_redemption).length;
+      const redeemed = visits.filter((v) => v.is_redemption).length;
+      const earned = Math.floor(paid / 10);
+      setLoyalty({
+        paidVisits: paid,
+        available: earned - redeemed,
+        progress: paid % 10,
+      });
+    };
+
+    const channel = supabase
+      .channel(`loyalty:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "visits",
+          filter: `user_id=eq.${user.id}`,
+        },
+        refreshLoyalty,
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   // Callback ref — fires the moment the canvas element mounts in the DOM
   const qrCanvasRef = (canvas: HTMLCanvasElement | null) => {
     if (!canvas || !user) return;

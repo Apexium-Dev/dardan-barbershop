@@ -225,10 +225,13 @@ export default function BarberPage() {
           padding: 32px 28px;
         }
         .barber-full { grid-column: 1 / -1; }
+        #qr-reader video { border-radius: 6px; }
+        #qr-reader img { display: none !important; }
         @media (max-width: 700px) {
-          .barber-page { padding: 24px 16px 64px; }
-          .barber-grid { grid-template-columns: 1fr; }
+          .barber-page { padding: 16px 12px 56px; margin-top: 72px; }
+          .barber-grid { grid-template-columns: 1fr; gap: 16px; }
           .barber-full { grid-column: 1; }
+          .barber-card { padding: 20px 16px; border-radius: 8px; }
         }
 
         .loyalty-block {
@@ -634,6 +637,8 @@ const s: Record<string, React.CSSProperties> = {
     fontSize: 13,
     color: "rgba(255,255,255,0.45)",
     margin: "2px 0",
+    wordBreak: "break-all" as const,
+    overflowWrap: "anywhere" as const,
   },
   label: {
     fontSize: 10,
