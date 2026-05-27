@@ -50,13 +50,16 @@ export default function ProfilePage() {
       if (profile?.role) setRole(profile.role);
 
       // Fetch loyalty stats
-      const { data: visits } = await supabase
+      const { data: visits, error: visitsErr } = await supabase
         .from("visits")
-        .select("is_redemption")
+        .select("id, is_redemption")
         .eq("user_id", u.id);
-      if (visits) {
-        const paid = visits.filter((v) => !v.is_redemption).length;
-        const redeemed = visits.filter((v) => v.is_redemption).length;
+      if (visitsErr) {
+        console.error("[loyalty] visits fetch error:", visitsErr.message);
+      }
+      if (visits !== null) {
+        const paid = visits.filter((v) => v.is_redemption !== true).length;
+        const redeemed = visits.filter((v) => v.is_redemption === true).length;
         const earned = Math.floor(paid / 10);
         setLoyalty({
           paidVisits: paid,
@@ -74,13 +77,17 @@ export default function ProfilePage() {
     if (!user) return;
 
     const refreshLoyalty = async () => {
-      const { data: visits } = await supabase
+      const { data: visits, error } = await supabase
         .from("visits")
-        .select("is_redemption")
+        .select("id, is_redemption")
         .eq("user_id", user.id);
-      if (!visits) return;
-      const paid = visits.filter((v) => !v.is_redemption).length;
-      const redeemed = visits.filter((v) => v.is_redemption).length;
+      if (error) {
+        console.error("[loyalty realtime] fetch error:", error.message);
+        return;
+      }
+      if (visits === null) return;
+      const paid = visits.filter((v) => v.is_redemption !== true).length;
+      const redeemed = visits.filter((v) => v.is_redemption === true).length;
       const earned = Math.floor(paid / 10);
       setLoyalty({
         paidVisits: paid,
