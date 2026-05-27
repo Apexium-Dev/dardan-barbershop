@@ -106,7 +106,7 @@ export default function BarberPage() {
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
+        { fps: 15, qrbox: { width: 280, height: 280 } },
         async (decodedText) => {
           // QR format: dardan-barbershop:user:<uuid>
           if (!decodedText.startsWith("dardan-barbershop:user:")) {

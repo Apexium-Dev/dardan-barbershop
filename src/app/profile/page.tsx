@@ -73,9 +73,9 @@ export default function ProfilePage() {
   const qrCanvasRef = (canvas: HTMLCanvasElement | null) => {
     if (!canvas || !user) return;
     QRCode.toCanvas(canvas, `dardan-barbershop:user:${user.id}`, {
-      width: 180,
+      width: 200,
       margin: 2,
-      color: { dark: "#c9a961", light: "#0f0f0f" },
+      color: { dark: "#0f0f0f", light: "#f5f0e8" },
     });
   };
 
