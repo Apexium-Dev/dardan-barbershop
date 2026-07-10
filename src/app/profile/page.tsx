@@ -8,9 +8,11 @@ import QRCode from "qrcode";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string>("member");
   const [loading, setLoading] = useState(true);
@@ -139,7 +141,7 @@ export default function ProfilePage() {
       setSaveError(error.message);
       return;
     }
-    setSaveMsg("Profile updated.");
+    setSaveMsg(t.profile.profileUpdated);
     setEditing(false);
     // refresh user
     const { data } = await supabase.auth.getUser();
@@ -162,7 +164,7 @@ export default function ProfilePage() {
   const displayName =
     firstName || lastName
       ? `${firstName} ${lastName}`.trim()
-      : (user?.email?.split("@")[0] ?? "Member");
+      : (user?.email?.split("@")[0] ?? t.profile.member);
 
   const initials =
     `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";
@@ -170,19 +172,9 @@ export default function ProfilePage() {
   return (
     <>
       <Navbar
-        lang="en"
-        setLang={() => {}}
         setView={() => {}}
         user={null}
         userData={null}
-        t={{
-          theCatalogue: "The Catalogue",
-          theCraftsmen: "The Craftsmen",
-          location: "Location",
-          bossMode: "Boss Mode",
-          login: "Login",
-          bookNow: "Book Now",
-        }}
         startBooking={() => router.push("/")}
       />
       <style>{`
@@ -263,9 +255,7 @@ export default function ProfilePage() {
 
             <h2 style={s.displayName}>{displayName}</h2>
             <p style={s.memberLabel}>
-              {role === "barber"
-                ? "Dardan Barbershop — Barber"
-                : "Dardan Barbershop Member"}
+              {role === "barber" ? t.profile.barberLabel : t.profile.memberLabel}
             </p>
 
             <div style={s.divider} />
@@ -273,7 +263,7 @@ export default function ProfilePage() {
             {/* Role-based panel */}
             {role === "barber" ? (
               <>
-                <p style={s.qrLabel}>BARBER TOOLS</p>
+                <p style={s.qrLabel}>{t.profile.barberTools}</p>
                 <button
                   style={s.scanBtn}
                   onClick={() => router.push("/barber")}
@@ -283,23 +273,23 @@ export default function ProfilePage() {
                   >
                     📷
                   </span>
-                  Scan Member QR
+                  {t.profile.scanMemberQr}
                 </button>
-                <p style={s.qrHint}>Open the scanner to log a visit</p>
+                <p style={s.qrHint}>{t.profile.scanHint}</p>
               </>
             ) : (
               <>
-                <p style={s.qrLabel}>YOUR MEMBER CODE</p>
+                <p style={s.qrLabel}>{t.profile.yourCode}</p>
                 <div style={s.qrWrap}>
                   <canvas ref={qrCanvasRef} style={{ borderRadius: 8 }} />
                 </div>
-                <p style={s.qrHint}>Show this at the barbershop</p>
+                <p style={s.qrHint}>{t.profile.codeHint}</p>
 
                 {/* Loyalty card */}
                 {loyalty !== null && (
                   <div style={s.loyaltyCard}>
                     <div style={s.loyaltyHeader}>
-                      <span style={s.loyaltyLabel}>Loyalty</span>
+                      <span style={s.loyaltyLabel}>{t.profile.loyaltyLabel}</span>
                       <span style={s.loyaltyCount}>
                         {loyalty.progress} / 10
                       </span>
@@ -320,11 +310,14 @@ export default function ProfilePage() {
                     </div>
                     {loyalty.available > 0 ? (
                       <p style={s.loyaltyFree}>
-                        🎁 {loyalty.available} free haircut{loyalty.available > 1 ? "s" : ""} ready
+                        🎁 {loyalty.available}{" "}
+                        {loyalty.available > 1
+                          ? t.profile.loyaltyFreePlural
+                          : t.profile.loyaltyFreeSingular}
                       </p>
                     ) : (
                       <p style={s.loyaltyHint}>
-                        {10 - loyalty.progress} more to earn a free haircut
+                        {10 - loyalty.progress} {t.profile.loyaltyMoreToEarn}
                       </p>
                     )}
                   </div>
@@ -335,7 +328,7 @@ export default function ProfilePage() {
             <div style={s.divider} />
 
             <button style={s.signOutBtn} onClick={handleSignOut}>
-              Sign Out
+              {t.profile.signOut}
             </button>
           </div>
 
@@ -343,9 +336,9 @@ export default function ProfilePage() {
           <div style={{ ...s.rightPanel }} className="profile-right">
             <div className="profile-card-header">
               <div>
-                <p style={s.eyebrow}>Account</p>
+                <p style={s.eyebrow}>{t.profile.account}</p>
                 <h1 style={s.title}>
-                  My <em>Profile</em>
+                  {t.profile.myProfileTitle1} <em>{t.profile.myProfileTitle2}</em>
                 </h1>
               </div>
               {!editing && (
@@ -357,7 +350,7 @@ export default function ProfilePage() {
                     setEditing(true);
                   }}
                 >
-                  Edit Profile
+                  {t.profile.editProfile}
                 </button>
               )}
             </div>
@@ -371,7 +364,7 @@ export default function ProfilePage() {
             <div className="profile-fields">
               {/* First Name */}
               <div style={s.field}>
-                <label style={s.label}>First Name</label>
+                <label style={s.label}>{t.profile.firstName}</label>
                 {editing ? (
                   <input
                     style={s.input}
@@ -394,7 +387,7 @@ export default function ProfilePage() {
 
               {/* Last Name */}
               <div style={s.field}>
-                <label style={s.label}>Last Name</label>
+                <label style={s.label}>{t.profile.lastName}</label>
                 {editing ? (
                   <input
                     style={s.input}
@@ -418,7 +411,7 @@ export default function ProfilePage() {
               {/* Email — read only */}
               <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                 <label style={s.label}>
-                  Email <span style={s.readOnlyTag}>read-only</span>
+                  {t.profile.email} <span style={s.readOnlyTag}>{t.profile.readOnly}</span>
                 </label>
                 <p style={{ ...s.value, color: "rgba(255,255,255,0.4)" }}>
                   {user?.email}
@@ -427,7 +420,7 @@ export default function ProfilePage() {
 
               {/* Phone */}
               <div style={{ ...s.field, gridColumn: "1 / -1" }}>
-                <label style={s.label}>Phone</label>
+                <label style={s.label}>{t.profile.phone}</label>
                 {editing ? (
                   <div
                     style={{
@@ -465,7 +458,7 @@ export default function ProfilePage() {
 
               {/* Member since */}
               <div style={{ ...s.field, gridColumn: "1 / -1" }}>
-                <label style={s.label}>Member Since</label>
+                <label style={s.label}>{t.profile.memberSince}</label>
                 <p style={s.value}>
                   {user?.created_at
                     ? new Date(user.created_at).toLocaleDateString("en-GB", {
@@ -486,7 +479,7 @@ export default function ProfilePage() {
                   onClick={() => setEditing(false)}
                   type="button"
                 >
-                  Cancel
+                  {t.profile.cancel}
                 </button>
                 <button
                   style={{ ...s.saveBtn, opacity: saving ? 0.6 : 1 }}
@@ -494,7 +487,7 @@ export default function ProfilePage() {
                   disabled={saving}
                   type="button"
                 >
-                  {saving ? "Saving…" : "Save Changes"}
+                  {saving ? t.profile.saving : t.profile.saveChanges}
                 </button>
               </div>
             )}

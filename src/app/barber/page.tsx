@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface CustomerInfo {
   id: string;
@@ -31,8 +32,15 @@ interface LoyaltyInfo {
   progress: number;    // 0–9, progress toward next reward
 }
 
+interface GalleryPhoto {
+  id: string;
+  storage_path: string;
+  caption: string | null;
+}
+
 export default function BarberPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const scannerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const html5QrRef = useRef<any>(null);
@@ -48,33 +56,115 @@ export default function BarberPage() {
   const [barberId, setBarberId] = useState<string>("");
   const [loyalty, setLoyalty] = useState<LoyaltyInfo | null>(null);
 
-  // Auth check
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [uploadCaption, setUploadCaption] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auth + role check — only barbers may access this panel
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.push("/auth");
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+      if (profile?.role !== "barber") {
+        router.push("/profile");
         return;
       }
       setBarberId(data.user.id);
     });
   }, [router]);
 
-  // Load recent visits
+  const loadVisits = async () => {
+    setLoadingVisits(true);
+    try {
+      const { data } = await supabase
+        .from("visits")
+        .select("id, scanned_at, notes, customer_email, customer_name, is_redemption")
+        .order("scanned_at", { ascending: false })
+        .limit(10);
+      setRecentVisits(data ?? []);
+    } finally {
+      setLoadingVisits(false);
+    }
+  };
+
+  const loadGallery = async () => {
+    setLoadingGallery(true);
+    try {
+      const { data } = await supabase
+        .from("gallery_photos")
+        .select("id, storage_path, caption")
+        .order("created_at", { ascending: false });
+      setGalleryPhotos(data ?? []);
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  // Load recent visits + gallery
   useEffect(() => {
     if (!barberId) return;
     loadVisits();
+    loadGallery();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [barberId]);
 
-  const loadVisits = async () => {
-    setLoadingVisits(true);
-    const { data } = await supabase
-      .from("visits")
-      .select("id, scanned_at, notes, customer_email, customer_name, is_redemption")
-      .order("scanned_at", { ascending: false })
-      .limit(10);
-    setRecentVisits(data ?? []);
-    setLoadingVisits(false);
+  const galleryUrl = (path: string) =>
+    supabase.storage.from("gallery").getPublicUrl(path).data.publicUrl;
+
+  const handleUpload = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      setUploadError(t.barber.chooseFirst);
+      return;
+    }
+    setUploadError("");
+    setUploading(true);
+
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from("gallery")
+      .upload(path, file);
+
+    if (uploadErr) {
+      setUploading(false);
+      setUploadError("Upload failed: " + uploadErr.message);
+      return;
+    }
+
+    const { error: insertErr } = await supabase.from("gallery_photos").insert({
+      storage_path: path,
+      caption: uploadCaption.trim() || null,
+      uploaded_by: barberId,
+    });
+
+    setUploading(false);
+    if (insertErr) {
+      setUploadError("Save failed: " + insertErr.message);
+      return;
+    }
+
+    setUploadCaption("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    loadGallery();
+  };
+
+  const handleDeletePhoto = async (photo: GalleryPhoto) => {
+    if (!window.confirm(t.barber.confirmRemovePhoto)) return;
+    await supabase.storage.from("gallery").remove([photo.storage_path]);
+    await supabase.from("gallery_photos").delete().eq("id", photo.id);
+    loadGallery();
   };
 
   const fetchLoyalty = async (userId: string) => {
@@ -110,9 +200,7 @@ export default function BarberPage() {
         async (decodedText) => {
           // QR format: dardan-barbershop:user:<uuid>
           if (!decodedText.startsWith("dardan-barbershop:user:")) {
-            setScanError(
-              "Invalid QR code — not a Dardan Barbershop member code.",
-            );
+            setScanError(t.barber.invalidQr);
             stopScanner();
             return;
           }
@@ -149,7 +237,7 @@ export default function BarberPage() {
       .single();
 
     if (error || !data) {
-      setScanError("Member not found. They may need to re-register.");
+      setScanError(t.barber.memberNotFound);
       return;
     }
     setCustomer(data as CustomerInfo);
@@ -175,7 +263,7 @@ export default function BarberPage() {
       setScanError("Save failed: " + error.message);
       return;
     }
-    setSavedMsg(isRedemption ? "🎁 Free haircut redeemed!" : "✓ Visit saved!");
+    setSavedMsg(isRedemption ? "🎁 " + t.barber.redemptionSaved : t.barber.visitSaved);
     setNotes("");
     setCustomer(null);
     setLoyalty(null);
@@ -193,19 +281,9 @@ export default function BarberPage() {
   return (
     <>
       <Navbar
-        lang="en"
-        setLang={() => {}}
         setView={() => {}}
         user={null}
         userData={null}
-        t={{
-          theCatalogue: "The Catalogue",
-          theCraftsmen: "The Craftsmen",
-          location: "Location",
-          bossMode: "Boss Mode",
-          login: "Login",
-          bookNow: "Book Now",
-        }}
         startBooking={() => router.push("/")}
       />
       <style>{`
@@ -332,9 +410,9 @@ export default function BarberPage() {
 
         {/* Page header */}
         <div style={{ maxWidth: 900, margin: "0 auto 32px" }}>
-          <p style={s.eyebrow}>Barber Panel</p>
+          <p style={s.eyebrow}>{t.barber.barberPanel}</p>
           <h1 style={s.title}>
-            Scan <em>Member</em>
+            {t.barber.scanTitle1} <em>{t.barber.scanTitle2}</em>
           </h1>
           <div style={s.divider} />
         </div>
@@ -342,11 +420,11 @@ export default function BarberPage() {
         <div className="barber-grid">
           {/* ── Scanner card ── */}
           <div className="barber-card">
-            <p style={s.cardLabel}>QR Scanner</p>
+            <p style={s.cardLabel}>{t.barber.qrScanner}</p>
 
             {!scanning && !customer && (
               <button style={s.primaryBtn} onClick={startScanner}>
-                📷 Start Camera
+                {t.barber.startCamera}
               </button>
             )}
 
@@ -365,7 +443,7 @@ export default function BarberPage() {
 
             {scanning && (
               <button style={s.ghostBtn} onClick={stopScanner}>
-                Cancel
+                {t.barber.cancel}
               </button>
             )}
 
@@ -394,7 +472,7 @@ export default function BarberPage() {
                       marginTop: 6,
                     }}
                   >
-                    Member since{" "}
+                    {t.barber.memberSince}{" "}
                     {new Date(customer.created_at).toLocaleDateString("en-GB", {
                       month: "long",
                       year: "numeric",
@@ -407,7 +485,7 @@ export default function BarberPage() {
             {customer && loyalty && (
               <div className="loyalty-block">
                 <div className="loyalty-header">
-                  <span className="loyalty-label">Loyalty Progress</span>
+                  <span className="loyalty-label">{t.barber.loyaltyProgress}</span>
                   <span className="loyalty-count">
                     {loyalty.progress} / 10
                   </span>
@@ -422,7 +500,10 @@ export default function BarberPage() {
                 </div>
                 {loyalty.available > 0 && (
                   <div className="loyalty-free-badge">
-                    🎁 {loyalty.available} free haircut{loyalty.available > 1 ? "s" : ""} available
+                    🎁 {loyalty.available}{" "}
+                    {loyalty.available > 1
+                      ? t.barber.freeHaircutPluralAvailable
+                      : t.barber.freeHaircutSingularAvailable}
                   </div>
                 )}
               </div>
@@ -431,10 +512,10 @@ export default function BarberPage() {
             {customer && (
               <>
                 <label style={{ ...s.label, marginTop: 20 }}>
-                  Notes (optional)
+                  {t.barber.notes}
                 </label>
                 <textarea
-                  placeholder="e.g. skin fade, beard trim…"
+                  placeholder={t.barber.notesPlaceholder}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
@@ -449,7 +530,7 @@ export default function BarberPage() {
                 />
                 <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
                   <button style={s.ghostBtn} onClick={resetScan} type="button">
-                    Discard
+                    {t.barber.discard}
                   </button>
                   <button
                     style={{
@@ -461,7 +542,7 @@ export default function BarberPage() {
                     disabled={saving}
                     type="button"
                   >
-                    {saving ? "Saving…" : "✓ Save Visit"}
+                    {saving ? t.barber.saving : t.barber.saveVisit}
                   </button>
                 </div>
                 {loyalty && loyalty.available > 0 && (
@@ -471,7 +552,7 @@ export default function BarberPage() {
                     disabled={saving}
                     type="button"
                   >
-                    🎁 Redeem Free Haircut
+                    🎁 {t.barber.redeemFreeHaircut}
                   </button>
                 )}
               </>
@@ -480,12 +561,12 @@ export default function BarberPage() {
 
           {/* ── Recent visits card ── */}
           <div className="barber-card">
-            <p style={s.cardLabel}>Recent Visits</p>
+            <p style={s.cardLabel}>{t.barber.recentVisits}</p>
 
-            {loadingVisits && <p style={s.dimText}>Loading…</p>}
+            {loadingVisits && <p style={s.dimText}>{t.barber.loading}</p>}
 
             {!loadingVisits && recentVisits.length === 0 && (
-              <p style={s.dimText}>No visits recorded yet.</p>
+              <p style={s.dimText}>{t.barber.noVisits}</p>
             )}
 
             {recentVisits.map((v) => (
@@ -509,7 +590,7 @@ export default function BarberPage() {
                         color: "#c9a961",
                         textTransform: "uppercase",
                         fontWeight: 700,
-                      }}>FREE</span>
+                      }}>{t.barber.freeBadge}</span>
                     )}
                   </p>
                   {v.notes && <p style={s.visitNote}>{v.notes}</p>}
@@ -525,6 +606,78 @@ export default function BarberPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ── Gallery management ── */}
+        <div
+          className="barber-card"
+          style={{ maxWidth: 900, margin: "28px auto 0" }}
+        >
+          <p style={s.cardLabel}>{t.barber.galleryManagement}</p>
+
+          <div style={s.uploadRow}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={s.fileInput}
+            />
+            <input
+              type="text"
+              placeholder={t.barber.captionPlaceholder}
+              value={uploadCaption}
+              onChange={(e) => setUploadCaption(e.target.value)}
+              style={s.captionInput}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+              }
+            />
+            <button
+              style={{
+                ...s.primaryBtn,
+                width: "auto",
+                marginBottom: 0,
+                padding: "12px 24px",
+                opacity: uploading ? 0.6 : 1,
+              }}
+              onClick={handleUpload}
+              disabled={uploading}
+              type="button"
+            >
+              {uploading ? t.barber.uploading : t.barber.uploadPhoto}
+            </button>
+          </div>
+
+          {uploadError && <p style={s.errorMsg}>{uploadError}</p>}
+
+          {loadingGallery && <p style={s.dimText}>{t.barber.loading}</p>}
+          {!loadingGallery && galleryPhotos.length === 0 && (
+            <p style={s.dimText}>{t.barber.noPhotos}</p>
+          )}
+
+          {!loadingGallery && galleryPhotos.length > 0 && (
+            <div style={s.galleryGrid}>
+              {galleryPhotos.map((photo) => (
+                <div key={photo.id} style={s.galleryThumbWrap}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={galleryUrl(photo.storage_path)}
+                    alt={photo.caption ?? "Gallery photo"}
+                    style={s.galleryThumb}
+                  />
+                  <button
+                    style={s.galleryRemoveBtn}
+                    onClick={() => handleDeletePhoto(photo)}
+                    type="button"
+                    aria-label="Remove photo"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <Footer />
@@ -724,5 +877,64 @@ const s: Record<string, React.CSSProperties> = {
     padding: "10px 14px",
     borderRadius: 4,
     marginTop: 12,
+  },
+  uploadRow: {
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  fileInput: {
+    flex: "1 1 200px",
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 13,
+  },
+  captionInput: {
+    flex: "1 1 180px",
+    padding: "12px 14px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 4,
+    color: "#fff",
+    fontSize: 13,
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 150ms",
+    fontFamily: "inherit",
+  },
+  galleryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+    gap: 12,
+  },
+  galleryThumbWrap: {
+    position: "relative",
+    aspectRatio: "1",
+    borderRadius: 6,
+    overflow: "hidden",
+    background: "#1a1a1a",
+  },
+  galleryThumb: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  galleryRemoveBtn: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    border: "none",
+    background: "rgba(15,15,15,0.75)",
+    color: "#fff",
+    fontSize: 14,
+    lineHeight: 1,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 };
