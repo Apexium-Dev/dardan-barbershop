@@ -1,315 +1,234 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/lib/LanguageContext";
+
+interface GalleryPhoto {
+  id: string;
+  storage_path: string;
+  caption: string | null;
+}
 
 const galleryStyles = `
   .gallery-section {
-    background: #0f0f0f;
-    padding: 96px 48px 120px;
-    position: relative;
-    overflow: hidden;
+    padding: 72px 48px 96px;
+    background-color: #0f0f0f;
   }
 
-  .gallery-section::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(201,169,97,0.2), transparent);
-  }
-
-  @media (max-width: 768px) {
-    .gallery-section { padding: 72px 24px 88px; }
-  }
-  @media (max-width: 480px) {
-    .gallery-section { padding: 56px 16px 72px; }
+  .gallery-inner {
+    max-width: 90rem;
+    margin: 0 auto;
   }
 
   .gallery-header {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 48px;
-    gap: 24px;
-  }
-
-  @media (max-width: 640px) {
-    .gallery-header { flex-direction: column; align-items: flex-start; }
-  }
-
-  .gallery-eyebrow {
-    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
   .gallery-eyebrow-line {
-    width: 32px;
+    width: 40px;
     height: 1px;
-    background: #c9a961;
+    background-color: #c9a961;
+    flex-shrink: 0;
   }
 
-  .gallery-eyebrow-text {
+  .gallery-eyebrow {
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.4em;
+    letter-spacing: 0.3em;
     color: #c9a961;
     font-weight: 700;
+  }
+
+  .gallery-title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
   }
 
   .gallery-title {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(40px, 5.5vw, 72px);
+    font-size: clamp(48px, 6vw, 88px);
     font-weight: 400;
-    color: #fff;
     line-height: 1;
-    margin: 0;
-  }
-
-  .gallery-title em {
-    color: #c9a961;
-    font-style: italic;
-  }
-
-  .gallery-subtitle {
-    font-size: 13px;
-    color: rgba(255,255,255,0.35);
-    font-weight: 300;
-    line-height: 1.7;
-    max-width: 240px;
-    text-align: right;
-  }
-
-  @media (max-width: 640px) {
-    .gallery-subtitle { text-align: left; max-width: 100%; }
-  }
-
-  /* Grid */
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 0.9fr 1fr;
-    grid-template-rows: 280px 280px;
-    gap: 14px;
-  }
-
-  @media (max-width: 1024px) {
-    .gallery-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 240px 240px 240px;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .gallery-section { padding: 48px 16px 64px; }
-    .gallery-header { margin-bottom: 24px; }
-    .gallery-title { font-size: clamp(34px, 9vw, 48px); }
-    .gallery-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 160px 160px;
-      gap: 10px;
-    }
-  }
-
-  .gallery-cell {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  /* Cell placements */
-  .gallery-cell-1 {
-    grid-column: 1;
-    grid-row: 1 / 3;
-  }
-
-  .gallery-cell-2 {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .gallery-cell-3 {
-    grid-column: 3;
-    grid-row: 1 / 3;
-  }
-
-  .gallery-cell-4 {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  @media (max-width: 1024px) {
-    .gallery-cell-1 { grid-column: 1; grid-row: 1 / 3; }
-    .gallery-cell-2 { grid-column: 2; grid-row: 1; }
-    .gallery-cell-3 { grid-column: 2; grid-row: 2; }
-    .gallery-cell-4 { grid-column: 1 / 3; grid-row: 3; }
-  }
-
-  @media (max-width: 640px) {
-    .gallery-cell-1,
-    .gallery-cell-2,
-    .gallery-cell-3,
-    .gallery-cell-4 {
-      grid-column: auto;
-      grid-row: auto;
-    }
-  }
-
-  .gallery-img {
-    object-fit: cover;
-    filter: grayscale(80%);
-    transition: filter 800ms ease, transform 800ms ease;
-  }
-
-  .gallery-cell:hover .gallery-img {
-    filter: grayscale(0%);
-    transform: scale(1.04);
-  }
-
-  /* Overlay on all cells */
-  .gallery-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(15,15,15,0.7) 0%, transparent 50%);
-    pointer-events: none;
-    transition: opacity 400ms ease;
-  }
-
-  .gallery-cell:hover .gallery-overlay {
-    opacity: 0.4;
-  }
-
-  /* Accent card (dark branded tile) */
-  .gallery-accent {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 24px;
-    background: linear-gradient(135deg, #141414 0%, #1c1a15 100%);
-    border: 1px solid rgba(201,169,97,0.18);
-  }
-
-  .gallery-accent-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.4em;
-    color: #c9a961;
-    font-weight: 700;
+    color: #ffffff;
     margin: 0 0 8px 0;
   }
 
-  .gallery-accent-text {
-    font-family: Georgia, serif;
+  .gallery-title em {
     font-style: italic;
-    font-size: clamp(18px, 2vw, 26px);
-    color: rgba(255,255,255,0.7);
-    font-weight: 400;
-    line-height: 1.3;
-    margin: 0;
+    color: #c9a961;
   }
 
-  .gallery-accent-line {
-    width: 32px;
+  .gallery-view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #c9a961;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.3);
+    padding-bottom: 4px;
+    transition: border-color 200ms ease, color 200ms ease;
+    white-space: nowrap;
+  }
+
+  .gallery-view-all:hover {
+    color: #e8c47a;
+    border-color: #e8c47a;
+  }
+
+  .gallery-divider {
+    width: 100%;
     height: 1px;
-    background: rgba(201,169,97,0.4);
-    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.07);
+    margin: 24px 0 40px 0;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .gallery-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #1a1a1a;
+  }
+
+  .gallery-image {
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 1000ms ease, transform 1000ms ease;
+  }
+
+  .gallery-item:hover .gallery-image {
+    filter: grayscale(0%);
+    transform: scale(1.05);
+  }
+
+  .gallery-item-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(201, 169, 97, 0.06);
+    opacity: 0;
+    transition: opacity 600ms ease;
+    pointer-events: none;
+  }
+
+  .gallery-item:hover .gallery-item-overlay {
+    opacity: 1;
+  }
+
+  .gallery-empty {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.35);
+    padding: 20px 0 0;
+  }
+
+  @media (max-width: 1024px) {
+    .gallery-section { padding: 56px 32px 72px; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  }
+
+  @media (max-width: 640px) {
+    .gallery-section { padding: 48px 20px 64px; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .gallery-title-row { flex-direction: column; align-items: flex-start; }
   }
 `;
 
-export const Gallery = () => (
-  <>
-    <style>{galleryStyles}</style>
-    <section className="gallery-section">
-      <div className="gallery-header">
-        <div>
-          <div className="gallery-eyebrow">
+export const Gallery = () => {
+  const { t } = useLanguage();
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPhotos = async () => {
+      try {
+        const { data } = await supabase
+          .from("gallery_photos")
+          .select("id, storage_path, caption")
+          .order("created_at", { ascending: false })
+          .limit(6);
+        setPhotos(data ?? []);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPhotos();
+  }, []);
+
+  return (
+    <>
+      <style>{galleryStyles}</style>
+      <section id="gallery" className="gallery-section">
+        <div className="gallery-inner">
+          <div className="gallery-header">
             <div className="gallery-eyebrow-line" />
-            <span className="gallery-eyebrow-text">The Work</span>
+            <span className="gallery-eyebrow">{t.gallery.eyebrow}</span>
           </div>
-          <h2 className="gallery-title">
-            The <em>Gallery.</em>
-          </h2>
+          <div className="gallery-title-row">
+            <h2 className="gallery-title">
+              {t.gallery.titlePlain} <em>{t.gallery.titleItalic}</em>
+            </h2>
+            <Link href="/gallery" className="gallery-view-all">
+              {t.gallery.viewAll}
+            </Link>
+          </div>
+          <div className="gallery-divider" />
+
+          {loading && <p className="gallery-empty">{t.gallery.loading}</p>}
+          {!loading && photos.length === 0 && (
+            <p className="gallery-empty">{t.gallery.empty}</p>
+          )}
+          {!loading && photos.length > 0 && (
+            <div className="gallery-grid">
+              {photos.map((photo, i) => {
+                const url = supabase.storage
+                  .from("gallery")
+                  .getPublicUrl(photo.storage_path).data.publicUrl;
+                return (
+                  <motion.div
+                    key={photo.id}
+                    className="gallery-item"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{
+                      duration: 0.6,
+                      delay: i * 0.08,
+                      ease: [0.25, 0.1, 0.25, 1],
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      alt={photo.caption ?? "Dardan Barbershop"}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="gallery-image"
+                    />
+                    <div className="gallery-item-overlay" />
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
-        <p className="gallery-subtitle">
-          Every cut is a canvas. A glimpse into the craft behind the chair.
-        </p>
-      </div>
-
-      <div className="gallery-grid">
-        {/* Cell 1 — tall left, shop photo */}
-        <motion.div
-          className="gallery-cell gallery-cell-1"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, delay: 0, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <Image
-            src="/shop.jpg"
-            alt="Dardan Barbershop interior"
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="gallery-img"
-          />
-          <div className="gallery-overlay" />
-        </motion.div>
-
-        {/* Cell 2 — top middle, barber photo */}
-        <motion.div
-          className="gallery-cell gallery-cell-2"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <Image
-            src="/barber.png"
-            alt="Barber at work"
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="gallery-img"
-          />
-          <div className="gallery-overlay" />
-        </motion.div>
-
-        {/* Cell 3 — tall right, shop photo different crop */}
-        <motion.div
-          className="gallery-cell gallery-cell-3"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <Image
-            src="/shop.jpg"
-            alt="Barbershop atmosphere"
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="gallery-img"
-            style={{ objectPosition: "right center" }}
-          />
-          <div className="gallery-overlay" />
-        </motion.div>
-
-        {/* Cell 4 — bottom middle, branded accent tile */}
-        <motion.div
-          className="gallery-cell gallery-cell-4 gallery-accent"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <p className="gallery-accent-label">Est. 2007</p>
-          <div className="gallery-accent-line" />
-          <p className="gallery-accent-text">
-            &ldquo;Not just a haircut — a ritual.&rdquo;
-          </p>
-        </motion.div>
-      </div>
-    </section>
-  </>
-);
+      </section>
+    </>
+  );
+};
