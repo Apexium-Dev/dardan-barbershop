@@ -3,12 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const team = [
   {
     name: "Dardan",
-    role: "Master Barber & Founder",
-    bio: "With nearly two decades of experience, Dardan built this shop from the ground up on a single principle — every client deserves the very best.",
     img: "/barber.png",
   },
 ];
@@ -198,55 +197,58 @@ const craftsmenStyles = `
   }
 `;
 
-export const Craftsmen = () => (
-  <>
-    <style>{craftsmenStyles}</style>
-    <section id="barbers" className="craftsmen-section">
-      <div className="craftsmen-inner">
-        {/* Header */}
-        <div className="craftsmen-header">
-          <div className="craftsmen-eyebrow-line" />
-          <span className="craftsmen-eyebrow">The Team</span>
-        </div>
-        <h2 className="craftsmen-title">
-          The <em>Craftsmen.</em>
-        </h2>
-        <div className="craftsmen-divider" />
+export const Craftsmen = () => {
+  const { t } = useLanguage();
+  return (
+    <>
+      <style>{craftsmenStyles}</style>
+      <section id="barbers" className="craftsmen-section">
+        <div className="craftsmen-inner">
+          {/* Header */}
+          <div className="craftsmen-header">
+            <div className="craftsmen-eyebrow-line" />
+            <span className="craftsmen-eyebrow">{t.craftsmen.eyebrow}</span>
+          </div>
+          <h2 className="craftsmen-title">
+            {t.craftsmen.titlePlain} <em>{t.craftsmen.titleItalic}</em>
+          </h2>
+          <div className="craftsmen-divider" />
 
-        {/* Grid */}
-        <div className="craftsmen-grid" style={{ margin: "0 auto" }}>
-          {team.map((member, i) => (
-            <motion.div
-              key={member.name}
-              className="craftsmen-card"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{
-                duration: 0.7,
-                delay: i * 0.15,
-                ease: [0.25, 0.1, 0.25, 1],
-              }}
-            >
-              <div className="craftsmen-image-wrapper">
-                <Image
-                  src={member.img}
-                  alt={member.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="craftsmen-image"
-                />
-                <div className="craftsmen-overlay" />
-                <span className="craftsmen-number">0{i + 1}</span>
-              </div>
+          {/* Grid */}
+          <div className="craftsmen-grid" style={{ margin: "0 auto" }}>
+            {team.map((member, i) => (
+              <motion.div
+                key={member.name}
+                className="craftsmen-card"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{
+                  duration: 0.7,
+                  delay: i * 0.15,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+              >
+                <div className="craftsmen-image-wrapper">
+                  <Image
+                    src={member.img}
+                    alt={member.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="craftsmen-image"
+                  />
+                  <div className="craftsmen-overlay" />
+                  <span className="craftsmen-number">0{i + 1}</span>
+                </div>
 
-              <h3 className="craftsmen-name">{member.name}</h3>
-              <p className="craftsmen-role">{member.role}</p>
-              <p className="craftsmen-bio">{member.bio}</p>
-            </motion.div>
-          ))}
+                <h3 className="craftsmen-name">{member.name}</h3>
+                <p className="craftsmen-role">{t.craftsmen.role}</p>
+                <p className="craftsmen-bio">{t.craftsmen.bio}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  </>
-);
+      </section>
+    </>
+  );
+};

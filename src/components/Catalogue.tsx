@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Clock } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const catalogueStyles = `
   .catalogue-section {
@@ -240,26 +241,13 @@ const catalogueStyles = `
   }
 `;
 
-const services = [
-  { name: "Haircut", price: "250 den", desc: "A clean, precise cut tailored to your head shape and style. No shortcuts taken.", duration: "30 min" },
-  { name: "Beard Trim", price: "150 den", desc: "Defined edges, even length, sculpted shape. Groomed but natural.", duration: "20 min" },
-  { name: "Hair Wash", price: "100 den", desc: "Thorough scalp cleanse with quality products. A clean foundation for every cut.", duration: "10 min" },
-  { name: "Eyebrows — Thread", price: "200 den", desc: "Precise eyebrow shaping using traditional threading technique for clean definition.", duration: "15 min" },
-  { name: "Eyebrows — Wax", price: "150 den", desc: "Quick and clean eyebrow shaping with wax. Smooth finish, sharp lines.", duration: "10 min" },
-  { name: "Nose & Ear Wax", price: "200 den", desc: "Hygienic removal of unwanted hair from nose and ears using warm wax.", duration: "15 min" },
-  { name: "Hair Bleach & Color", price: "1200 den", desc: "Full bleach process followed by your chosen color. Expertly handled from start to finish.", duration: "2+ hrs" },
-  { name: "Black Hair Coloring", price: "200 den", desc: "Restore rich, deep black color to your hair. Even application, lasting results.", duration: "45 min" },
-  { name: "Black Beard Coloring", price: "200 den", desc: "Deep black dye applied evenly to the beard. Looks fresh, stays sharp.", duration: "30 min" },
-  { name: "Black Hair & Beard", price: "400 den", desc: "Combined hair and beard coloring in black. Full, unified look in one session.", duration: "60 min" },
-  { name: "Mask & Steam Treatment", price: "300 den", desc: "Deep conditioning mask applied under steam for maximum absorption and softness.", duration: "30 min" },
-];
-
 interface CatalogueProps {
   startBooking: () => void;
-  t?: Record<string, string>;
 }
 
 export const Catalogue = ({ startBooking }: CatalogueProps) => {
+  const { t } = useLanguage();
+  const services = t.catalogue.services;
   return (
     <>
       <style>{catalogueStyles}</style>
@@ -267,17 +255,15 @@ export const Catalogue = ({ startBooking }: CatalogueProps) => {
         <div className="catalogue-container">
           <div className="catalogue-inner">
             <div className="catalogue-left">
-              <p className="catalogue-eyebrow">The Catalogue</p>
+              <p className="catalogue-eyebrow">{t.catalogue.eyebrow}</p>
               <h2 className="catalogue-heading">
-                The
-                <em>Catalogue.</em>
+                {t.catalogue.headingPlain}
+                <em>{t.catalogue.headingItalic}</em>
               </h2>
               <div className="catalogue-divider" />
-              <p className="catalogue-desc">
-                A curated selection of grooming excellence. Each session is a tailored experience crafted to your structure and style.
-              </p>
+              <p className="catalogue-desc">{t.catalogue.description}</p>
               <div className="catalogue-quality">
-                <p className="catalogue-quality-label">Quality Assurance</p>
+                <p className="catalogue-quality-label">{t.catalogue.qualityLabel}</p>
                 <div className="catalogue-quality-dots">
                   {[0, 1, 2].map((i) => (
                     <div key={i} className="catalogue-quality-dot" />
@@ -307,9 +293,7 @@ export const Catalogue = ({ startBooking }: CatalogueProps) => {
                   </div>
                 ))}
               </div>
-              <p className="catalogue-footer-note">
-                Consultations are complimentary with every service.
-              </p>
+              <p className="catalogue-footer-note">{t.catalogue.footerNote}</p>
             </div>
           </div>
         </div>

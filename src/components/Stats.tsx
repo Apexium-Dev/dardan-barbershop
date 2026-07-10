@@ -2,13 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-
-const stats = [
-  { number: "18+", label: "Years of\nMastery" },
-  { number: "10K+", label: "Satisfied\nClients" },
-  { number: "5★", label: "Google\nRating" },
-  { number: "100%", label: "Precision\nEvery Time" },
-];
+import { useLanguage } from "@/lib/LanguageContext";
 
 const statsStyles = `
   .stats-strip {
@@ -97,8 +91,16 @@ const statsStyles = `
   }
 `;
 
-export const Stats = () => (
-  <>
+export const Stats = () => {
+  const { t } = useLanguage();
+  const stats = [
+    { number: "5+", label: t.stats.yearsOfMastery },
+    { number: "10K+", label: t.stats.satisfiedClients },
+    { number: "5★", label: t.stats.googleRating },
+    { number: "100%", label: t.stats.precisionEveryTime },
+  ];
+  return (
+    <>
     <style>{statsStyles}</style>
     <div className="stats-strip">
       <div className="stats-inner">
@@ -117,5 +119,6 @@ export const Stats = () => (
         ))}
       </div>
     </div>
-  </>
-);
+    </>
+  );
+};

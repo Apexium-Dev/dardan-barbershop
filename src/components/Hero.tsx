@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const heroStyles = `
   /* Hero Section Container */
@@ -250,60 +251,62 @@ const heroStyles = `
 `;
 
 interface HeroProps {
-  t: Record<string, string>;
   startBooking: () => void;
   setView: (view: string) => void;
 }
 
-export const Hero = ({ t, startBooking, setView }: HeroProps) => (
-  <>
-    <style>{heroStyles}</style>
-    <section className="hero-section">
-      <div className="hero-content">
-        <motion.div
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="hero-badge"
-        >
-          <div className="hero-badge-line"></div>
-          <span className="hero-badge-text">Established 2007</span>
-        </motion.div>
-
-        <h1 className="hero-title">
-          {t.heroTitle}{" "}
-          <span className="hero-title-highlight">{t.heroSubtitle}</span>
-        </h1>
-
-        <div className="hero-buttons">
-          <button onClick={() => startBooking()} className="hero-book-btn">
-            {t.bookNow}
-          </button>
-          <button
-            onClick={() => setView("loyalty")}
-            className="hero-member-btn"
+export const Hero = ({ startBooking, setView }: HeroProps) => {
+  const { t } = useLanguage();
+  return (
+    <>
+      <style>{heroStyles}</style>
+      <section className="hero-section">
+        <div className="hero-content">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="hero-badge"
           >
-            {t.memberPortal} <Zap size={14} />
-          </button>
-        </div>
-      </div>
+            <div className="hero-badge-line"></div>
+            <span className="hero-badge-text">{t.hero.established}</span>
+          </motion.div>
 
-      <div className="hero-image-container">
-        <Image
-          src="/shop.jpg"
-          alt="Barbershop Atmosphere"
-          fill
-          priority
-          loading="eager"
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          className="hero-image"
-          style={{ objectFit: "cover" }}
-        />
-        <div className="hero-image-overlay"></div>
-        <div className="hero-quote">
-          &ldquo;Precision in{" "}
-          <span className="hero-quote-highlight">Every Move.&rdquo;</span>
+          <h1 className="hero-title">
+            {t.hero.heroTitle}{" "}
+            <span className="hero-title-highlight">{t.hero.heroSubtitle}</span>
+          </h1>
+
+          <div className="hero-buttons">
+            <button onClick={() => startBooking()} className="hero-book-btn">
+              {t.hero.bookNow}
+            </button>
+            <button
+              onClick={() => setView("loyalty")}
+              className="hero-member-btn"
+            >
+              {t.hero.memberPortal} <Zap size={14} />
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
-  </>
-);
+
+        <div className="hero-image-container">
+          <Image
+            src="/shop.jpg"
+            alt="Barbershop Atmosphere"
+            fill
+            priority
+            loading="eager"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="hero-image"
+            style={{ objectFit: "cover" }}
+          />
+          <div className="hero-image-overlay"></div>
+          <div className="hero-quote">
+            {t.hero.quotePrefix}{" "}
+            <span className="hero-quote-highlight">{t.hero.quoteHighlight}</span>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+};

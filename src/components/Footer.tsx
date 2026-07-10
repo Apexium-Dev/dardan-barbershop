@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const footerStyles = `
   .footer {
@@ -251,8 +252,10 @@ const footerStyles = `
   }
 `;
 
-export const Footer = () => (
-  <>
+export const Footer = () => {
+  const { t } = useLanguage();
+  return (
+    <>
     <style>{footerStyles}</style>
     <footer id="info" className="footer">
       <div className="footer-inner">
@@ -267,10 +270,7 @@ export const Footer = () => (
               className="footer-logo"
               style={{ height: "auto", width: "auto" }}
             />
-            <p className="footer-tagline">
-              Precision craftsmanship rooted in tradition. Every cut tells a
-              story of nearly two decades of mastery.
-            </p>
+            <p className="footer-tagline">{t.footer.tagline}</p>
             <div className="footer-socials">
               {/* Instagram */}
               <a
@@ -316,11 +316,11 @@ export const Footer = () => (
 
           {/* Location */}
           <div>
-            <p className="footer-col-label">Location</p>
+            <p className="footer-col-label">{t.footer.location}</p>
             <p className="footer-address">
-              20m near General Hospital
+              {t.footer.address1}
               <br />
-              Dibër, Macedonia
+              {t.footer.address2}
             </p>
             <a href="tel:+38970000000" className="footer-phone">
               +389 70 000 000
@@ -329,33 +329,33 @@ export const Footer = () => (
 
           {/* Hours */}
           <div>
-            <p className="footer-col-label">Availability</p>
+            <p className="footer-col-label">{t.footer.availability}</p>
             <div className="footer-hours-row">
-              <span className="footer-hours-day">Mon — Fri</span>
+              <span className="footer-hours-day">{t.footer.monFri}</span>
               <span className="footer-hours-time">09:00 — 22:00</span>
             </div>
             <div className="footer-hours-row">
-              <span className="footer-hours-day">Saturday</span>
+              <span className="footer-hours-day">{t.footer.saturday}</span>
               <span className="footer-hours-time">08:00 — 22:00</span>
             </div>
             <div className="footer-hours-row">
-              <span className="footer-hours-day">Sunday</span>
-              <span className="footer-hours-time closed">Closed</span>
+              <span className="footer-hours-day">{t.footer.sunday}</span>
+              <span className="footer-hours-time closed">{t.footer.closed}</span>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <p className="footer-copy">
-            © 2026 <span>Dardan Barbershop</span>. All rights reserved.
+            © 2026 <span>Dardan Barbershop</span>. {t.footer.copyright}
           </p>
           <div className="footer-bottom-links">
             <a href="/privacy" className="footer-bottom-link">
-              Privacy Policy
+              {t.footer.privacy}
             </a>
             <span className="footer-bottom-dot" />
             <a href="/terms" className="footer-bottom-link">
-              Terms of Service
+              {t.footer.terms}
             </a>
             <span className="footer-bottom-dot" />
             <a
@@ -364,11 +364,12 @@ export const Footer = () => (
               rel="noopener noreferrer"
               className="footer-made"
             >
-              Crafted by Apexium Dev
+              {t.footer.craftedBy}
             </a>
           </div>
         </div>
       </div>
     </footer>
-  </>
-);
+    </>
+  );
+};

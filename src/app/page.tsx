@@ -46,31 +46,12 @@ export default function Home() {
         }}
       >
         <Navbar
-          lang="en"
-          setLang={() => {}}
           setView={setView}
           user={null}
           userData={null}
-          t={{
-            theCatalogue: "The Catalogue",
-            theCraftsmen: "The Craftsmen",
-            location: "Location",
-            bossMode: "Boss Mode",
-            login: "Login",
-            bookNow: "Book Now",
-          }}
           startBooking={startBooking}
         />
-        <Hero
-          t={{
-            heroTitle: "Precision in",
-            heroSubtitle: "Every Detail.",
-            memberPortal: "Member Portal",
-            bookNow: "Book Now",
-          }}
-          startBooking={startBooking}
-          setView={setView}
-        />
+        <Hero startBooking={startBooking} setView={setView} />
         <Stats />
         <Catalogue startBooking={startBooking} />
         <Gallery />

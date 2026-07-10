@@ -16,10 +16,16 @@ export const SmoothScroll = ({ children }: { children: React.ReactNode }) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest("a[href^='#']") as HTMLAnchorElement | null;
       if (!anchor) return;
-      e.preventDefault();
       const id = anchor.getAttribute("href")!.slice(1);
       const el = document.getElementById(id);
-      if (el) lenis.scrollTo(el, { offset: -80, duration: 0.9 });
+      if (el) {
+        e.preventDefault();
+        lenis.scrollTo(el, { offset: -80, duration: 0.9 });
+      } else if (window.location.pathname !== "/") {
+        // Section lives on the homepage but we're on another page — go there.
+        e.preventDefault();
+        window.location.href = "/#" + id;
+      }
     };
 
     document.addEventListener("click", handleAnchorClick);

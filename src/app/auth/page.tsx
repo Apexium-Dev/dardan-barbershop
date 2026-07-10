@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useLanguage } from "@/lib/LanguageContext";
 
 type View = "login" | "register" | "forgot";
 
 export default function AuthPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [view, setView] = useState<View>("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -36,7 +38,7 @@ export default function AuthPage() {
   const handleLogin = async () => {
     clearMessages();
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      setError(t.auth.fillAllFields);
       return;
     }
     setLoading(true);
@@ -55,15 +57,15 @@ export default function AuthPage() {
   const handleRegister = async () => {
     clearMessages();
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
+      setError(t.auth.fillAllFields);
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t.auth.passwordsNoMatch);
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t.auth.passwordTooShort);
       return;
     }
     setLoading(true);
@@ -83,13 +85,13 @@ export default function AuthPage() {
       setError(err.message);
       return;
     }
-    setSuccess("Account created! Check your email to confirm your address.");
+    setSuccess(t.auth.accountCreated);
   };
 
   const handleForgot = async () => {
     clearMessages();
     if (!email) {
-      setError("Please enter your email address.");
+      setError(t.auth.enterEmail);
       return;
     }
     setLoading(true);
@@ -101,7 +103,7 @@ export default function AuthPage() {
       setError(err.message);
       return;
     }
-    setSuccess("Reset link sent! Check your inbox.");
+    setSuccess(t.auth.resetSent);
   };
 
   return (
@@ -152,16 +154,16 @@ export default function AuthPage() {
         {/* ══════════════════════════════════════════════════════ LOGIN */}
         {view === "login" && (
           <div style={styles.form}>
-            <p style={styles.eyebrow}>Welcome Back</p>
+            <p style={styles.eyebrow}>{t.auth.welcomeBack}</p>
             <h1 style={styles.title}>
-              Sign <em>In</em>
+              {t.auth.signInTitle1} <em>{t.auth.signInTitle2}</em>
             </h1>
             <div style={styles.divider} />
 
             {error && <p style={styles.errorMsg}>{error}</p>}
             {success && <p style={styles.successMsg}>{success}</p>}
 
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>{t.auth.email}</label>
             <input
               type="email"
               placeholder="your@email.com"
@@ -174,7 +176,7 @@ export default function AuthPage() {
               }
             />
 
-            <label style={{ ...styles.label, marginTop: 18 }}>Password</label>
+            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.password}</label>
             <div style={styles.passWrap}>
               <input
                 type={showPass ? "text" : "password"}
@@ -205,7 +207,7 @@ export default function AuthPage() {
               }}
               type="button"
             >
-              Forgot password?
+              {t.auth.forgotPassword}
             </button>
 
             <button
@@ -214,11 +216,11 @@ export default function AuthPage() {
               type="button"
               disabled={loading}
             >
-              {loading ? "Signing in…" : "Sign In"}
+              {loading ? t.auth.signingIn : t.auth.signIn}
             </button>
 
             <p style={styles.switchText}>
-              Don&apos;t have an account?{" "}
+              {t.auth.dontHaveAccount}{" "}
               <button
                 style={styles.switchLink}
                 onClick={() => {
@@ -227,7 +229,7 @@ export default function AuthPage() {
                 }}
                 type="button"
               >
-                Create one
+                {t.auth.createOne}
               </button>
             </p>
           </div>
@@ -236,9 +238,9 @@ export default function AuthPage() {
         {/* ══════════════════════════════════════════════════ REGISTER */}
         {view === "register" && (
           <div style={styles.form}>
-            <p style={styles.eyebrow}>Join the Club</p>
+            <p style={styles.eyebrow}>{t.auth.joinClub}</p>
             <h1 style={styles.title}>
-              Create <em>Account</em>
+              {t.auth.createTitle1} <em>{t.auth.createTitle2}</em>
             </h1>
             <div style={styles.divider} />
 
@@ -247,10 +249,10 @@ export default function AuthPage() {
 
             <div style={styles.row} className="auth-name-row">
               <div style={{ flex: 1 }}>
-                <label style={styles.label}>First Name</label>
+                <label style={styles.label}>{t.auth.firstName}</label>
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={t.auth.firstName}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   style={{ ...styles.input, marginBottom: 0 }}
@@ -264,10 +266,10 @@ export default function AuthPage() {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={styles.label}>Last Name</label>
+                <label style={styles.label}>{t.auth.lastName}</label>
                 <input
                   type="text"
-                  placeholder="Last Name"
+                  placeholder={t.auth.lastName}
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   style={{ ...styles.input, marginBottom: 0 }}
@@ -282,7 +284,7 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <label style={{ ...styles.label, marginTop: 18 }}>Phone</label>
+            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.phone}</label>
             <div
               style={{
                 ...styles.phoneWrap,
@@ -315,7 +317,7 @@ export default function AuthPage() {
               />
             </div>
 
-            <label style={{ ...styles.label, marginTop: 18 }}>Email</label>
+            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.email}</label>
             <input
               type="email"
               placeholder="your@email.com"
@@ -328,7 +330,7 @@ export default function AuthPage() {
               }
             />
 
-            <label style={{ ...styles.label, marginTop: 18 }}>Password</label>
+            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.password}</label>
             <div style={styles.passWrap}>
               <input
                 type={showPass ? "text" : "password"}
@@ -351,7 +353,7 @@ export default function AuthPage() {
             </div>
 
             <label style={{ ...styles.label, marginTop: 18 }}>
-              Confirm Password
+              {t.auth.confirmPassword}
             </label>
             <div style={styles.passWrap}>
               <input
@@ -375,13 +377,13 @@ export default function AuthPage() {
             </div>
 
             <p style={styles.terms}>
-              By creating an account you agree to our{" "}
+              {t.auth.termsPrefix}{" "}
               <Link href="/terms" style={styles.termsLink}>
-                Terms of Service
+                {t.auth.termsLink}
               </Link>{" "}
-              and{" "}
+              {t.auth.and}{" "}
               <Link href="/privacy" style={styles.termsLink}>
-                Privacy Policy
+                {t.auth.privacyLink}
               </Link>
               .
             </p>
@@ -392,11 +394,11 @@ export default function AuthPage() {
               type="button"
               disabled={loading}
             >
-              {loading ? "Creating account…" : "Create Account"}
+              {loading ? t.auth.creatingAccount : t.auth.createAccount}
             </button>
 
             <p style={styles.switchText}>
-              Already have an account?{" "}
+              {t.auth.alreadyHaveAccount}{" "}
               <button
                 style={styles.switchLink}
                 onClick={() => {
@@ -405,7 +407,7 @@ export default function AuthPage() {
                 }}
                 type="button"
               >
-                Sign in
+                {t.auth.signInLink}
               </button>
             </p>
           </div>
@@ -414,21 +416,18 @@ export default function AuthPage() {
         {/* ══════════════════════════════════════════════════════ FORGOT */}
         {view === "forgot" && (
           <div style={styles.form}>
-            <p style={styles.eyebrow}>No Worries</p>
+            <p style={styles.eyebrow}>{t.auth.noWorries}</p>
             <h1 style={styles.title}>
-              Reset <em>Password</em>
+              {t.auth.resetTitle1} <em>{t.auth.resetTitle2}</em>
             </h1>
             <div style={styles.divider} />
 
             {error && <p style={styles.errorMsg}>{error}</p>}
             {success && <p style={styles.successMsg}>{success}</p>}
 
-            <p style={styles.hint}>
-              Enter the email address linked to your account and we&apos;ll send
-              you a reset link.
-            </p>
+            <p style={styles.hint}>{t.auth.resetHint}</p>
 
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>{t.auth.email}</label>
             <input
               type="email"
               placeholder="your@email.com"
@@ -447,7 +446,7 @@ export default function AuthPage() {
               type="button"
               disabled={loading}
             >
-              {loading ? "Sending…" : "Send Reset Link"}
+              {loading ? t.auth.sending : t.auth.sendResetLink}
             </button>
 
             <button
@@ -458,7 +457,7 @@ export default function AuthPage() {
               }}
               type="button"
             >
-              <BackArrow /> Back to Sign In
+              <BackArrow /> {t.auth.backToSignIn}
             </button>
           </div>
         )}

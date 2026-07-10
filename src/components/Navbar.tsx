@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { User, Scan, Menu, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-// import { Language } from "../translations";
-
-type Language = "en" | "al" | "mk";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const navbarStyles = `
   /* Navbar Container */
@@ -367,27 +366,23 @@ const navbarStyles = `
 `;
 
 interface NavbarProps {
-  lang: Language;
-  setLang: (lang: Language) => void;
   setView: (view: string) => void;
   user: { uid: string } | null;
   userData: { isAdmin?: boolean } | null;
-  t: Record<string, string>;
   startBooking: () => void;
 }
 
 export const Navbar = ({
-  lang,
-  setLang,
   setView,
   user,
   userData,
-  t,
   startBooking,
 }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const { lang, setLang, t } = useLanguage();
 
   useEffect(() => {
     supabase.auth
@@ -405,8 +400,14 @@ export const Navbar = ({
       <nav className="navbar">
         <div className="navbar-container">
           <div className="navbar-left">
-            <button
-              onClick={() => router.push("/")}
+            <Link
+              href="/"
+              onClick={(e) => {
+                if (pathname === "/") {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               className="navbar-logo"
             >
               <Image
@@ -416,7 +417,7 @@ export const Navbar = ({
                 height={90}
                 style={{ height: "auto", width: "auto" }}
               />
-            </button>
+            </Link>
 
             <div className="navbar-menu">
               <div className="navbar-languages">
@@ -433,13 +434,16 @@ export const Navbar = ({
 
               <div className="navbar-links">
                 <a href="/#menu" className="navbar-link">
-                  {t.theCatalogue}
+                  {t.nav.catalogue}
                 </a>
                 <a href="/#barbers" className="navbar-link">
-                  {t.theCraftsmen}
+                  {t.nav.craftsmen}
                 </a>
+                <Link href="/gallery" className="navbar-link">
+                  {t.nav.gallery}
+                </Link>
                 <a href="/#info" className="navbar-link">
-                  {t.location}
+                  {t.nav.location}
                 </a>
               </div>
             </div>
@@ -448,7 +452,7 @@ export const Navbar = ({
           <div className="navbar-right">
             {userData?.isAdmin && (
               <button onClick={() => setView("admin")} className="navbar-admin">
-                <Scan size={14} /> {t.bossMode}
+                <Scan size={14} /> {t.nav.bossMode}
               </button>
             )}
 
@@ -480,7 +484,7 @@ export const Navbar = ({
                 onClick={() => startBooking()}
                 className="navbar-book-btn"
               >
-                {t.bookNow}
+                {t.nav.bookNow}
               </button>
             </div>
           </div>
@@ -509,21 +513,28 @@ export const Navbar = ({
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
-              {t.theCatalogue}
+              {t.nav.catalogue}
             </a>
             <a
               href="/#barbers"
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
-              {t.theCraftsmen}
+              {t.nav.craftsmen}
             </a>
+            <Link
+              href="/gallery"
+              className="navbar-mobile-link"
+              onClick={() => setMenuOpen(false)}
+            >
+              {t.nav.gallery}
+            </Link>
             <a
               href="/#info"
               className="navbar-mobile-link"
               onClick={() => setMenuOpen(false)}
             >
-              {t.location}
+              {t.nav.location}
             </a>
           </div>
 
@@ -536,7 +547,7 @@ export const Navbar = ({
                 }}
                 className="navbar-mobile-login-btn"
               >
-                My Profile
+                {t.nav.myProfile}
               </button>
             ) : (
               <button
@@ -546,7 +557,7 @@ export const Navbar = ({
                 }}
                 className="navbar-mobile-login-btn"
               >
-                {t.login}
+                {t.nav.login}
               </button>
             )}
 
@@ -557,7 +568,7 @@ export const Navbar = ({
               }}
               className="navbar-mobile-book-btn"
             >
-              {t.bookNow}
+              {t.nav.bookNow}
             </button>
           </div>
         </div>
