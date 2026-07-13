@@ -322,8 +322,8 @@ export const Footer = () => {
               <br />
               {t.footer.address2}
             </p>
-            <a href="tel:+38970000000" className="footer-phone">
-              +389 70 000 000
+            <a href="tel:+38972646141" className="footer-phone">
+              +389 72 646 141
             </a>
           </div>
 

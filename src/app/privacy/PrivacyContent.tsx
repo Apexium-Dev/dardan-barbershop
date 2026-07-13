@@ -175,7 +175,7 @@ export default function PrivacyContent() {
             <br />
             Atanasie Iliq, Debar, North Macedonia
             <br />
-            Phone: <a href="tel:072646141">072 646 141</a>
+            Phone: <a href="tel:+38972646141">+389 72 646 141</a>
           </p>
         </div>
       </div>
