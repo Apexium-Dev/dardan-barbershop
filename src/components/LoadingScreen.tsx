@@ -16,6 +16,27 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     const mount = mountRef.current;
     if (!mount) return;
 
+    // The dismiss timer and progress bar are set up first and unconditionally.
+    // Everything below (WebGL/Three.js) is wrapped in try/catch — on older or
+    // restricted devices, WebGL context creation can throw synchronously, and
+    // if that happened before this timer existed, the fixed full-screen
+    // overlay below would never be dismissed, permanently blocking every
+    // click on the site.
+    let prog = 0;
+    const progInterval = setInterval(() => {
+      prog = Math.min(prog + Math.random() * 9 + 3, 100);
+      setProgress(Math.floor(prog));
+      if (prog >= 100) clearInterval(progInterval);
+    }, 30);
+
+    const dismissTimer = setTimeout(() => {
+      setFading(true);
+      setTimeout(onComplete, 700);
+    }, 1600);
+
+    let cleanupScene = () => {};
+
+    try {
     // ── Scene ──────────────────────────────────────────────────────────
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#0f0f0f");
@@ -170,19 +191,6 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       (err) => console.error("GLB load error:", err),
     );
 
-    // ── Fast progress (1.6 s) ──────────────────────────────────────────
-    let prog = 0;
-    const progInterval = setInterval(() => {
-      prog = Math.min(prog + Math.random() * 9 + 3, 100);
-      setProgress(Math.floor(prog));
-      if (prog >= 100) clearInterval(progInterval);
-    }, 30);
-
-    const dismissTimer = setTimeout(() => {
-      setFading(true);
-      setTimeout(onComplete, 700);
-    }, 1600);
-
     // ── Resize ─────────────────────────────────────────────────────────
     const onResize = () => {
       if (!mount) return;
@@ -194,9 +202,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     };
     window.addEventListener("resize", onResize);
 
-    return () => {
-      clearTimeout(dismissTimer);
-      clearInterval(progInterval);
+    cleanupScene = () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
       if (mount.contains(renderer.domElement))
@@ -206,6 +212,15 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       steelOverride.dispose();
       pGeo.dispose();
       pMat.dispose();
+    };
+    } catch (err) {
+      console.error("3D loading scene failed to initialize:", err);
+    }
+
+    return () => {
+      clearTimeout(dismissTimer);
+      clearInterval(progInterval);
+      cleanupScene();
     };
   }, [onComplete]);
 
