@@ -173,6 +173,12 @@ export interface Translations {
     redeemFreeHaircut: string;
     freeBadge: string;
     redemptionSaved: string;
+    enterAccessCode: string;
+    incorrectCode: string;
+    scanQrCode: string;
+    addPhotoToGallery: string;
+    backToMenu: string;
+    lock: string;
   };
   legal: {
     backHome: string;
@@ -411,6 +417,12 @@ export const translations: Record<Language, Translations> = {
       redeemFreeHaircut: "Redeem Free Haircut",
       freeBadge: "FREE",
       redemptionSaved: "Free haircut redeemed!",
+      enterAccessCode: "Enter Access Code",
+      incorrectCode: "Incorrect code — try again.",
+      scanQrCode: "Scan QR Code",
+      addPhotoToGallery: "Add Photo to Gallery",
+      backToMenu: "← Back to menu",
+      lock: "Lock",
     },
     legal: {
       backHome: "← Back to home",
@@ -687,6 +699,12 @@ export const translations: Record<Language, Translations> = {
       redeemFreeHaircut: "Përdor Qethjen Falas",
       freeBadge: "FALAS",
       redemptionSaved: "Qethja falas u përdor!",
+      enterAccessCode: "Vendos Kodin e Hyrjes",
+      incorrectCode: "Kod i pasaktë — provo përsëri.",
+      scanQrCode: "Skano Kod QR",
+      addPhotoToGallery: "Shto Foto në Galeri",
+      backToMenu: "← Kthehu te menuja",
+      lock: "Kyç",
     },
     legal: {
       backHome: "← Kthehu në ballinë",
@@ -963,6 +981,12 @@ export const translations: Record<Language, Translations> = {
       redeemFreeHaircut: "Искористи бесплатно шишање",
       freeBadge: "БЕСПЛАТНО",
       redemptionSaved: "Бесплатното шишање е искористено!",
+      enterAccessCode: "Внесете пристапен код",
+      incorrectCode: "Погрешен код — обидете се повторно.",
+      scanQrCode: "Скенирај QR код",
+      addPhotoToGallery: "Додај фотографија во галерија",
+      backToMenu: "← Назад кон менито",
+      lock: "Заклучи",
     },
     legal: {
       backHome: "← Назад кон почетна",

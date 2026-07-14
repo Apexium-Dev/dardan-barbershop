@@ -38,12 +38,20 @@ interface GalleryPhoto {
   caption: string | null;
 }
 
+const ACCESS_CODE = "0101";
+type BarberView = "menu" | "scan" | "gallery";
+
 export default function BarberPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const scannerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const html5QrRef = useRef<any>(null);
+
+  const [unlocked, setUnlocked] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState(false);
+  const [view, setView] = useState<BarberView>("menu");
 
   const [scanning, setScanning] = useState(false);
   const [customer, setCustomer] = useState<CustomerInfo | null>(null);
@@ -278,6 +286,41 @@ export default function BarberPage() {
     stopScanner();
   };
 
+  // PIN pad
+  const handleDigit = (digit: string) => {
+    if (pinError || pin.length >= 4) return;
+    const next = pin + digit;
+    setPin(next);
+    if (next.length === 4) {
+      if (next === ACCESS_CODE) {
+        setTimeout(() => {
+          setUnlocked(true);
+          setView("menu");
+          setPin("");
+        }, 120);
+      } else {
+        setPinError(true);
+        setTimeout(() => {
+          setPin("");
+          setPinError(false);
+        }, 500);
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    if (pinError) return;
+    setPin((p) => p.slice(0, -1));
+  };
+
+  const lockPanel = () => {
+    stopScanner();
+    resetScan();
+    setUnlocked(false);
+    setPin("");
+    setView("menu");
+  };
+
   return (
     <>
       <Navbar
@@ -310,6 +353,160 @@ export default function BarberPage() {
           .barber-grid { grid-template-columns: 1fr; gap: 16px; }
           .barber-full { grid-column: 1; }
           .barber-card { padding: 20px 16px; border-radius: 8px; }
+        }
+
+        /* ── PIN lock screen ── */
+        .pin-wrap {
+          max-width: 340px;
+          margin: 40px auto 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .pin-dots {
+          display: flex;
+          gap: 16px;
+          margin: 28px 0 36px;
+        }
+        .pin-dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 1px solid rgba(201,169,97,0.4);
+          background: transparent;
+          transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+        }
+        .pin-dot.filled {
+          background: #c9a961;
+          border-color: #c9a961;
+        }
+        .pin-dots.error .pin-dot {
+          border-color: #f87171;
+          background: #f87171;
+        }
+        .pin-dots.error {
+          animation: pin-shake 420ms ease;
+        }
+        @keyframes pin-shake {
+          10%, 90% { transform: translateX(-2px); }
+          20%, 80% { transform: translateX(4px); }
+          30%, 50%, 70% { transform: translateX(-8px); }
+          40%, 60% { transform: translateX(8px); }
+        }
+        .pin-error-msg {
+          color: #f87171;
+          font-size: 12px;
+          height: 16px;
+          margin: -24px 0 20px;
+        }
+        .numpad {
+          display: grid;
+          grid-template-columns: repeat(3, 72px);
+          gap: 16px;
+        }
+        .num-key {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.03);
+          color: #fff;
+          font-size: 24px;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 150ms ease, border-color 150ms ease;
+        }
+        .num-key:hover { background: rgba(201,169,97,0.12); border-color: rgba(201,169,97,0.4); }
+        .num-key:active { background: rgba(201,169,97,0.25); }
+        .num-key.ghost {
+          border: none;
+          background: transparent;
+          color: rgba(255,255,255,0.4);
+          font-size: 16px;
+        }
+        .num-key.ghost:hover { background: rgba(255,255,255,0.05); }
+        @media (max-width: 420px) {
+          .numpad { grid-template-columns: repeat(3, 64px); gap: 12px; }
+          .num-key { width: 64px; height: 64px; font-size: 22px; }
+        }
+
+        /* ── Menu screen ── */
+        .barber-header-row {
+          max-width: 900px;
+          margin: 0 auto 32px;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 16px;
+        }
+        .lock-btn {
+          flex-shrink: 0;
+          padding: 10px 18px;
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 4px;
+          background: transparent;
+          color: rgba(255,255,255,0.5);
+          font-size: 11px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: border-color 150ms ease, color 150ms ease;
+        }
+        .lock-btn:hover { border-color: #c9a961; color: #c9a961; }
+        .menu-grid {
+          max-width: 700px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+        .menu-btn {
+          background: rgba(20,20,20,0.92);
+          border: 1px solid rgba(201,169,97,0.15);
+          border-radius: 8px;
+          padding: 48px 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          cursor: pointer;
+          transition: border-color 200ms ease, transform 200ms ease, background 200ms ease;
+        }
+        .menu-btn:hover {
+          border-color: rgba(201,169,97,0.5);
+          background: rgba(201,169,97,0.05);
+          transform: translateY(-3px);
+        }
+        .menu-btn-icon { font-size: 40px; line-height: 1; }
+        .menu-btn-label {
+          font-size: 13px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          font-weight: 700;
+          color: #fff;
+        }
+        .back-btn {
+          display: inline-flex;
+          align-items: center;
+          background: transparent;
+          border: none;
+          color: #c9a961;
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          font-weight: 700;
+          cursor: pointer;
+          margin-bottom: 20px;
+          padding: 0;
+        }
+        .back-btn:hover { opacity: 0.7; }
+        @media (max-width: 700px) {
+          .menu-grid { grid-template-columns: 1fr; max-width: 400px; }
+          .menu-btn { padding: 36px 20px; }
         }
 
         .loyalty-block {
@@ -408,15 +605,107 @@ export default function BarberPage() {
           }}
         />
 
-        {/* Page header */}
-        <div style={{ maxWidth: 900, margin: "0 auto 32px" }}>
-          <p style={s.eyebrow}>{t.barber.barberPanel}</p>
-          <h1 style={s.title}>
-            {t.barber.scanTitle1} <em>{t.barber.scanTitle2}</em>
-          </h1>
-          <div style={s.divider} />
-        </div>
+        {!unlocked && (
+          <div className="pin-wrap">
+            <p style={s.eyebrow}>{t.barber.barberPanel}</p>
+            <h1 style={{ ...s.title, fontSize: "clamp(24px, 4vw, 32px)" }}>
+              {t.barber.enterAccessCode}
+            </h1>
+            <div className={`pin-dots${pinError ? " error" : ""}`}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`pin-dot${i < pin.length ? " filled" : ""}`}
+                />
+              ))}
+            </div>
+            <p className="pin-error-msg">
+              {pinError ? t.barber.incorrectCode : ""}
+            </p>
+            <div className="numpad">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className="num-key"
+                  onClick={() => handleDigit(d)}
+                >
+                  {d}
+                </button>
+              ))}
+              <span />
+              <button
+                type="button"
+                className="num-key"
+                onClick={() => handleDigit("0")}
+              >
+                0
+              </button>
+              <button
+                type="button"
+                className="num-key ghost"
+                onClick={handleBackspace}
+                aria-label="Backspace"
+              >
+                ⌫
+              </button>
+            </div>
+          </div>
+        )}
 
+        {unlocked && (
+        <div className="barber-header-row">
+          <div>
+            <p style={s.eyebrow}>{t.barber.barberPanel}</p>
+            <h1 style={s.title}>
+              {t.barber.scanTitle1} <em>{t.barber.scanTitle2}</em>
+            </h1>
+            <div style={s.divider} />
+          </div>
+          <button type="button" className="lock-btn" onClick={lockPanel}>
+            🔒 {t.barber.lock}
+          </button>
+        </div>
+        )}
+
+        {view === "menu" && unlocked && (
+          <div className="menu-grid">
+            <div
+              className="menu-btn"
+              onClick={() => setView("scan")}
+              onKeyDown={(e) => e.key === "Enter" && setView("scan")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="menu-btn-icon">📷</span>
+              <span className="menu-btn-label">{t.barber.scanQrCode}</span>
+            </div>
+            <div
+              className="menu-btn"
+              onClick={() => setView("gallery")}
+              onKeyDown={(e) => e.key === "Enter" && setView("gallery")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="menu-btn-icon">🖼️</span>
+              <span className="menu-btn-label">
+                {t.barber.addPhotoToGallery}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {view === "scan" && unlocked && (
+        <>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => setView("menu")}
+          >
+            {t.barber.backToMenu}
+          </button>
+        </div>
         <div className="barber-grid">
           {/* ── Scanner card ── */}
           <div className="barber-card">
@@ -607,11 +896,24 @@ export default function BarberPage() {
             ))}
           </div>
         </div>
+        </>
+        )}
 
+        {view === "gallery" && unlocked && (
+        <>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => setView("menu")}
+          >
+            {t.barber.backToMenu}
+          </button>
+        </div>
         {/* ── Gallery management ── */}
         <div
           className="barber-card"
-          style={{ maxWidth: 900, margin: "28px auto 0" }}
+          style={{ maxWidth: 900, margin: "0 auto" }}
         >
           <p style={s.cardLabel}>{t.barber.galleryManagement}</p>
 
@@ -679,6 +981,8 @@ export default function BarberPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
       <Footer />
       <ScrollToTop />
