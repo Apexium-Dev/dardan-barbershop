@@ -61,7 +61,6 @@ export default function BarberPage() {
   const [savedMsg, setSavedMsg] = useState("");
   const [recentVisits, setRecentVisits] = useState<Visit[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(true);
-  const [barberId, setBarberId] = useState<string>("");
   const [loyalty, setLoyalty] = useState<LoyaltyInfo | null>(null);
 
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
@@ -70,26 +69,6 @@ export default function BarberPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Auth + role check — only barbers may access this panel
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) {
-        router.push("/auth");
-        return;
-      }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.user.id)
-        .single();
-      if (profile?.role !== "barber") {
-        router.push("/profile");
-        return;
-      }
-      setBarberId(data.user.id);
-    });
-  }, [router]);
 
   const loadVisits = async () => {
     setLoadingVisits(true);
@@ -120,11 +99,10 @@ export default function BarberPage() {
 
   // Load recent visits + gallery
   useEffect(() => {
-    if (!barberId) return;
     loadVisits();
     loadGallery();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [barberId]);
+  }, []);
 
   const galleryUrl = (path: string) =>
     supabase.storage.from("gallery").getPublicUrl(path).data.publicUrl;
@@ -154,7 +132,6 @@ export default function BarberPage() {
     const { error: insertErr } = await supabase.from("gallery_photos").insert({
       storage_path: path,
       caption: uploadCaption.trim() || null,
-      uploaded_by: barberId,
     });
 
     setUploading(false);
@@ -253,13 +230,12 @@ export default function BarberPage() {
   };
 
   const saveVisit = async (isRedemption = false) => {
-    if (!customer || !barberId) return;
+    if (!customer) return;
     setSaving(true);
     setSavedMsg("");
 
     const { error } = await supabase.from("visits").insert({
       user_id: customer.id,
-      barber_id: barberId,
       notes: notes.trim() || null,
       customer_email: customer.email,
       customer_name: `${customer.first_name} ${customer.last_name}`.trim(),
