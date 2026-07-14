@@ -83,6 +83,9 @@ export interface Translations {
     resetTitle1: string;
     resetTitle2: string;
     email: string;
+    username: string;
+    usernameOrEmail: string;
+    name: string;
     password: string;
     confirmPassword: string;
     firstName: string;
@@ -111,6 +114,9 @@ export interface Translations {
     accountCreated: string;
     enterEmail: string;
     resetSent: string;
+    usernameInvalid: string;
+    usernameTaken: string;
+    accountNotFound: string;
   };
   profile: {
     account: string;
@@ -120,6 +126,7 @@ export interface Translations {
     firstName: string;
     lastName: string;
     email: string;
+    username: string;
     readOnly: string;
     phone: string;
     memberSince: string;
@@ -179,6 +186,19 @@ export interface Translations {
     addPhotoToGallery: string;
     backToMenu: string;
     lock: string;
+    resetClientPassword: string;
+    searchClientPlaceholder: string;
+    noClientsFound: string;
+    newPassword: string;
+    confirmNewPassword: string;
+    resetPasswordBtn: string;
+    resetting: string;
+    passwordResetSuccess: string;
+    passwordResetFailed: string;
+    changeClient: string;
+    addUser: string;
+    createAccountTitle: string;
+    createAccountFailed: string;
   };
   legal: {
     backHome: string;
@@ -326,6 +346,9 @@ export const translations: Record<Language, Translations> = {
       resetTitle1: "Reset",
       resetTitle2: "Password",
       email: "Email",
+      username: "Username",
+      usernameOrEmail: "Username",
+      name: "Name",
       password: "Password",
       confirmPassword: "Confirm Password",
       firstName: "First Name",
@@ -352,9 +375,13 @@ export const translations: Record<Language, Translations> = {
       fillAllFields: "Please fill in all fields.",
       passwordsNoMatch: "Passwords do not match.",
       passwordTooShort: "Password must be at least 6 characters.",
-      accountCreated: "Account created! Check your email to confirm your address.",
+      accountCreated: "Account created!",
       enterEmail: "Please enter your email address.",
       resetSent: "Reset link sent! Check your inbox.",
+      usernameInvalid:
+        "Username can only use letters, numbers, dots, underscores, and hyphens (3–20 characters).",
+      usernameTaken: "That username is already taken.",
+      accountNotFound: "No account found with that username.",
     },
     profile: {
       account: "Account",
@@ -364,6 +391,7 @@ export const translations: Record<Language, Translations> = {
       firstName: "First Name",
       lastName: "Last Name",
       email: "Email",
+      username: "Username",
       readOnly: "read-only",
       phone: "Phone",
       memberSince: "Member Since",
@@ -423,6 +451,19 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Add Photo to Gallery",
       backToMenu: "← Back to menu",
       lock: "Lock",
+      resetClientPassword: "Reset Client Password",
+      searchClientPlaceholder: "Search by name or username…",
+      noClientsFound: "No clients found.",
+      newPassword: "New Password",
+      confirmNewPassword: "Confirm New Password",
+      resetPasswordBtn: "Reset Password",
+      resetting: "Resetting…",
+      passwordResetSuccess: "Password reset!",
+      passwordResetFailed: "Reset failed — try again.",
+      changeClient: "Change",
+      addUser: "Add User",
+      createAccountTitle: "Create Client Account",
+      createAccountFailed: "Could not create account — try again.",
     },
     legal: {
       backHome: "← Back to home",
@@ -608,6 +649,9 @@ export const translations: Record<Language, Translations> = {
       resetTitle1: "Rivendos",
       resetTitle2: "Fjalëkalimin",
       email: "Email",
+      username: "Emri i përdoruesit",
+      usernameOrEmail: "Emri i përdoruesit",
+      name: "Emri",
       password: "Fjalëkalimi",
       confirmPassword: "Konfirmo Fjalëkalimin",
       firstName: "Emri",
@@ -634,9 +678,13 @@ export const translations: Record<Language, Translations> = {
       fillAllFields: "Ju lutemi plotësoni të gjitha fushat.",
       passwordsNoMatch: "Fjalëkalimet nuk përputhen.",
       passwordTooShort: "Fjalëkalimi duhet të ketë të paktën 6 karaktere.",
-      accountCreated: "Llogaria u krijua! Kontrolloni email-in për të konfirmuar adresën.",
+      accountCreated: "Llogaria u krijua!",
       enterEmail: "Ju lutemi shkruani adresën tuaj të email-it.",
       resetSent: "Lidhja e rivendosjes u dërgua! Kontrolloni inbox-in.",
+      usernameInvalid:
+        "Emri i përdoruesit mund të përmbajë vetëm shkronja, numra, pika, nënvija dhe vija (3–20 karaktere).",
+      usernameTaken: "Ky emër përdoruesi është tashmë i zënë.",
+      accountNotFound: "Nuk u gjet asnjë llogari me këtë emër përdoruesi.",
     },
     profile: {
       account: "Llogaria",
@@ -646,6 +694,7 @@ export const translations: Record<Language, Translations> = {
       firstName: "Emri",
       lastName: "Mbiemri",
       email: "Email",
+      username: "Emri i përdoruesit",
       readOnly: "vetëm-lexim",
       phone: "Telefoni",
       memberSince: "Anëtar Që Prej",
@@ -705,6 +754,19 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Shto Foto në Galeri",
       backToMenu: "← Kthehu te menuja",
       lock: "Kyç",
+      resetClientPassword: "Rivendos Fjalëkalimin e Klientit",
+      searchClientPlaceholder: "Kërko sipas emrit ose emrit të përdoruesit…",
+      noClientsFound: "Nuk u gjetën klientë.",
+      newPassword: "Fjalëkalimi i Ri",
+      confirmNewPassword: "Konfirmo Fjalëkalimin e Ri",
+      resetPasswordBtn: "Rivendos Fjalëkalimin",
+      resetting: "Duke rivendosur…",
+      passwordResetSuccess: "Fjalëkalimi u rivendos!",
+      passwordResetFailed: "Rivendosja dështoi — provo përsëri.",
+      changeClient: "Ndrysho",
+      addUser: "Shto Përdorues",
+      createAccountTitle: "Krijo Llogari Klienti",
+      createAccountFailed: "Krijimi dështoi — provo përsëri.",
     },
     legal: {
       backHome: "← Kthehu në ballinë",
@@ -890,6 +952,9 @@ export const translations: Record<Language, Translations> = {
       resetTitle1: "Ресетирај",
       resetTitle2: "лозинка",
       email: "Е-пошта",
+      username: "Корисничко име",
+      usernameOrEmail: "Корисничко име",
+      name: "Име",
       password: "Лозинка",
       confirmPassword: "Потврди лозинка",
       firstName: "Име",
@@ -916,9 +981,13 @@ export const translations: Record<Language, Translations> = {
       fillAllFields: "Ве молиме пополнете ги сите полиња.",
       passwordsNoMatch: "Лозинките не се совпаѓаат.",
       passwordTooShort: "Лозинката мора да има најмалку 6 карактери.",
-      accountCreated: "Профилот е отворен! Проверете ја е-поштата за да ја потврдите адресата.",
+      accountCreated: "Профилот е отворен!",
       enterEmail: "Ве молиме внесете ја вашата е-пошта.",
       resetSent: "Линкот за ресетирање е испратен! Проверете го сандачето.",
+      usernameInvalid:
+        "Корисничкото име може да содржи само букви, бројки, точки, долни црти и цртички (3–20 карактери).",
+      usernameTaken: "Ова корисничко име е веќе зафатено.",
+      accountNotFound: "Не е пронајден профил со тоа корисничко име.",
     },
     profile: {
       account: "Профил",
@@ -928,6 +997,7 @@ export const translations: Record<Language, Translations> = {
       firstName: "Име",
       lastName: "Презиме",
       email: "Е-пошта",
+      username: "Корисничко име",
       readOnly: "само за читање",
       phone: "Телефон",
       memberSince: "Член од",
@@ -987,6 +1057,19 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Додај фотографија во галерија",
       backToMenu: "← Назад кон менито",
       lock: "Заклучи",
+      resetClientPassword: "Ресетирај лозинка на клиент",
+      searchClientPlaceholder: "Барај по име или корисничко име…",
+      noClientsFound: "Не се пронајдени клиенти.",
+      newPassword: "Нова лозинка",
+      confirmNewPassword: "Потврди нова лозинка",
+      resetPasswordBtn: "Ресетирај лозинка",
+      resetting: "Се ресетира…",
+      passwordResetSuccess: "Лозинката е ресетирана!",
+      passwordResetFailed: "Ресетирањето не успеа — обидете се повторно.",
+      changeClient: "Промени",
+      addUser: "Додај корисник",
+      createAccountTitle: "Креирај профил на клиент",
+      createAccountFailed: "Не успеа да се креира — обидете се повторно.",
     },
     legal: {
       backHome: "← Назад кон почетна",

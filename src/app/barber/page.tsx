@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLanguage } from "@/lib/LanguageContext";
+import { isValidUsername } from "@/lib/syntheticEmail";
 
 interface CustomerInfo {
   id: string;
@@ -39,7 +40,14 @@ interface GalleryPhoto {
 }
 
 const ACCESS_CODE = "0101";
-type BarberView = "menu" | "scan" | "gallery";
+type BarberView = "menu" | "scan" | "gallery" | "reset" | "create";
+
+interface ClientResult {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  username: string | null;
+}
 
 export default function BarberPage() {
   const router = useRouter();
@@ -69,6 +77,137 @@ export default function BarberPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [clientQuery, setClientQuery] = useState("");
+  const [clientResults, setClientResults] = useState<ClientResult[]>([]);
+  const [searchingClients, setSearchingClients] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientResult | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMsg, setResetMsg] = useState("");
+  const [resetError, setResetError] = useState("");
+
+  const [newUsername, setNewUsername] = useState("");
+  const [newAccountPassword, setNewAccountPassword] = useState("");
+  const [newAccountConfirmPassword, setNewAccountConfirmPassword] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createMsg, setCreateMsg] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  useEffect(() => {
+    const q = clientQuery.trim();
+    const timeout = setTimeout(async () => {
+      if (q.length < 2) {
+        setClientResults([]);
+        return;
+      }
+      setSearchingClients(true);
+      // Strip characters meaningful to PostgREST's filter syntax before
+      // interpolating into .or() — this is a raw filter-expression string,
+      // not a parameterized query.
+      const safeQ = q.replace(/[,.()%*]/g, "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, username")
+        .eq("role", "member")
+        .or(
+          `first_name.ilike.%${safeQ}%,last_name.ilike.%${safeQ}%,username.ilike.%${safeQ}%`,
+        )
+        .limit(10);
+      setClientResults(data ?? []);
+      setSearchingClients(false);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [clientQuery]);
+
+  const resetClientPassword = async () => {
+    if (!selectedClient) return;
+    setResetError("");
+    setResetMsg("");
+    if (newPassword !== confirmNewPassword) {
+      setResetError(t.auth.passwordsNoMatch);
+      return;
+    }
+    if (newPassword.length < 6) {
+      setResetError(t.auth.passwordTooShort);
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const res = await fetch("/api/barber/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin: ACCESS_CODE,
+          userId: selectedClient.id,
+          newPassword,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setResetMsg(t.barber.passwordResetSuccess);
+      setNewPassword("");
+      setConfirmNewPassword("");
+      // Keep the client selected so the success message (rendered inside
+      // the "selected client" view) is actually visible. The barber clicks
+      // "Change" when they're ready to search for someone else.
+    } catch {
+      setResetError(t.barber.passwordResetFailed);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const createClientAccount = async () => {
+    setCreateError("");
+    setCreateMsg("");
+    if (!newUsername || !newAccountPassword || !newAccountConfirmPassword) {
+      setCreateError(t.auth.fillAllFields);
+      return;
+    }
+    if (newAccountPassword !== newAccountConfirmPassword) {
+      setCreateError(t.auth.passwordsNoMatch);
+      return;
+    }
+    if (newAccountPassword.length < 6) {
+      setCreateError(t.auth.passwordTooShort);
+      return;
+    }
+    const cleanUsername = newUsername.trim().toLowerCase();
+    if (!isValidUsername(cleanUsername)) {
+      setCreateError(t.auth.usernameInvalid);
+      return;
+    }
+    setCreateLoading(true);
+    try {
+      const res = await fetch("/api/barber/create-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin: ACCESS_CODE,
+          username: cleanUsername,
+          password: newAccountPassword,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setCreateError(
+          body?.error === "username_taken"
+            ? t.auth.usernameTaken
+            : t.barber.createAccountFailed,
+        );
+        return;
+      }
+      setCreateMsg(t.auth.accountCreated);
+      setNewUsername("");
+      setNewAccountPassword("");
+      setNewAccountConfirmPassword("");
+    } catch {
+      setCreateError(t.barber.createAccountFailed);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   const loadVisits = async () => {
     setLoadingVisits(true);
@@ -295,6 +434,18 @@ export default function BarberPage() {
     setUnlocked(false);
     setPin("");
     setView("menu");
+    setClientQuery("");
+    setClientResults([]);
+    setSelectedClient(null);
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setResetMsg("");
+    setResetError("");
+    setNewUsername("");
+    setNewAccountPassword("");
+    setNewAccountConfirmPassword("");
+    setCreateMsg("");
+    setCreateError("");
   };
 
   return (
@@ -434,10 +585,10 @@ export default function BarberPage() {
         }
         .lock-btn:hover { border-color: #c9a961; color: #c9a961; }
         .menu-grid {
-          max-width: 700px;
+          max-width: 640px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: 24px;
         }
         .menu-btn {
@@ -483,6 +634,59 @@ export default function BarberPage() {
         @media (max-width: 700px) {
           .menu-grid { grid-template-columns: 1fr; max-width: 400px; }
           .menu-btn { padding: 36px 20px; }
+        }
+
+        /* ── Reset client password ── */
+        .client-search-input {
+          width: 100%;
+          padding: 13px 16px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 4px;
+          color: #fff;
+          font-size: 14px;
+          outline: none;
+          box-sizing: border-box;
+          transition: border-color 150ms;
+          margin-bottom: 16px;
+        }
+        .client-search-input:focus { border-color: #c9a961; }
+        .client-result-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 14px;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 4px;
+          margin-bottom: 8px;
+          cursor: pointer;
+          transition: border-color 150ms, background 150ms;
+        }
+        .client-result-row:hover {
+          border-color: rgba(201,169,97,0.4);
+          background: rgba(201,169,97,0.06);
+        }
+        .client-result-name { font-size: 14px; color: #fff; font-weight: 500; }
+        .client-result-username { font-size: 12px; color: rgba(255,255,255,0.35); }
+        .selected-client-card {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 16px;
+          background: rgba(201,169,97,0.06);
+          border: 1px solid rgba(201,169,97,0.2);
+          border-radius: 6px;
+          margin-bottom: 20px;
+        }
+        .change-client-btn {
+          background: transparent;
+          border: none;
+          color: rgba(255,255,255,0.4);
+          font-size: 12px;
+          text-decoration: underline;
+          cursor: pointer;
         }
 
         .loyalty-block {
@@ -667,6 +871,28 @@ export default function BarberPage() {
               <span className="menu-btn-label">
                 {t.barber.addPhotoToGallery}
               </span>
+            </div>
+            <div
+              className="menu-btn"
+              onClick={() => setView("reset")}
+              onKeyDown={(e) => e.key === "Enter" && setView("reset")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="menu-btn-icon">🔑</span>
+              <span className="menu-btn-label">
+                {t.barber.resetClientPassword}
+              </span>
+            </div>
+            <div
+              className="menu-btn"
+              onClick={() => setView("create")}
+              onKeyDown={(e) => e.key === "Enter" && setView("create")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="menu-btn-icon">➕</span>
+              <span className="menu-btn-label">{t.barber.addUser}</span>
             </div>
           </div>
         )}
@@ -956,6 +1182,195 @@ export default function BarberPage() {
               ))}
             </div>
           )}
+        </div>
+        </>
+        )}
+
+        {view === "reset" && unlocked && (
+        <>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => setView("menu")}
+          >
+            {t.barber.backToMenu}
+          </button>
+        </div>
+        <div
+          className="barber-card"
+          style={{ maxWidth: 900, margin: "0 auto" }}
+        >
+          <p style={s.cardLabel}>{t.barber.resetClientPassword}</p>
+
+          {!selectedClient && (
+            <>
+              <input
+                type="text"
+                placeholder={t.barber.searchClientPlaceholder}
+                value={clientQuery}
+                onChange={(e) => setClientQuery(e.target.value)}
+                className="client-search-input"
+              />
+              {searchingClients && <p style={s.dimText}>{t.barber.loading}</p>}
+              {!searchingClients &&
+                clientQuery.trim().length >= 2 &&
+                clientResults.length === 0 && (
+                  <p style={s.dimText}>{t.barber.noClientsFound}</p>
+                )}
+              {clientResults.map((c) => (
+                <div
+                  key={c.id}
+                  className="client-result-row"
+                  onClick={() => {
+                    setSelectedClient(c);
+                    setResetMsg("");
+                    setResetError("");
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <span className="client-result-name">
+                    {`${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() ||
+                      c.username ||
+                      "—"}
+                  </span>
+                  {c.username && (
+                    <span className="client-result-username">
+                      @{c.username}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {selectedClient && (
+            <>
+              <div className="selected-client-card">
+                <div>
+                  <p style={{ ...s.customerName, fontSize: 15, marginBottom: 2 }}>
+                    {`${selectedClient.first_name ?? ""} ${selectedClient.last_name ?? ""}`.trim() ||
+                      selectedClient.username}
+                  </p>
+                  {selectedClient.username && (
+                    <p style={s.customerDetail}>@{selectedClient.username}</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="change-client-btn"
+                  onClick={() => {
+                    setSelectedClient(null);
+                    setResetMsg("");
+                    setResetError("");
+                  }}
+                >
+                  {t.barber.changeClient}
+                </button>
+              </div>
+
+              <label style={{ ...s.label, marginTop: 4 }}>
+                {t.barber.newPassword}
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                style={s.textarea}
+              />
+
+              <label style={{ ...s.label, marginTop: 16 }}>
+                {t.barber.confirmNewPassword}
+              </label>
+              <input
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                style={s.textarea}
+              />
+
+              {resetError && <p style={s.errorMsg}>{resetError}</p>}
+              {resetMsg && <p style={s.successMsg}>{resetMsg}</p>}
+
+              <button
+                style={{
+                  ...s.primaryBtn,
+                  marginTop: 20,
+                  opacity: resetLoading ? 0.6 : 1,
+                }}
+                onClick={resetClientPassword}
+                disabled={resetLoading}
+                type="button"
+              >
+                {resetLoading ? t.barber.resetting : t.barber.resetPasswordBtn}
+              </button>
+            </>
+          )}
+        </div>
+        </>
+        )}
+
+        {view === "create" && unlocked && (
+        <>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <button
+            type="button"
+            className="back-btn"
+            onClick={() => setView("menu")}
+          >
+            {t.barber.backToMenu}
+          </button>
+        </div>
+        <div
+          className="barber-card"
+          style={{ maxWidth: 900, margin: "0 auto" }}
+        >
+          <p style={s.cardLabel}>{t.barber.createAccountTitle}</p>
+
+          <label style={s.label}>{t.auth.username}</label>
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            style={s.textarea}
+          />
+
+          <label style={{ ...s.label, marginTop: 16 }}>
+            {t.auth.password}
+          </label>
+          <input
+            type="password"
+            value={newAccountPassword}
+            onChange={(e) => setNewAccountPassword(e.target.value)}
+            style={s.textarea}
+          />
+
+          <label style={{ ...s.label, marginTop: 16 }}>
+            {t.auth.confirmPassword}
+          </label>
+          <input
+            type="password"
+            value={newAccountConfirmPassword}
+            onChange={(e) => setNewAccountConfirmPassword(e.target.value)}
+            style={s.textarea}
+          />
+
+          {createError && <p style={s.errorMsg}>{createError}</p>}
+          {createMsg && <p style={s.successMsg}>{createMsg}</p>}
+
+          <button
+            style={{
+              ...s.primaryBtn,
+              marginTop: 20,
+              opacity: createLoading ? 0.6 : 1,
+            }}
+            onClick={createClientAccount}
+            disabled={createLoading}
+            type="button"
+          >
+            {createLoading ? t.auth.creatingAccount : t.auth.createAccount}
+          </button>
         </div>
         </>
         )}

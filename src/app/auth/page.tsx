@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/lib/LanguageContext";
+import { SYNTHETIC_EMAIL_DOMAIN, isValidUsername } from "@/lib/syntheticEmail";
 
 type View = "login" | "register" | "forgot";
 
@@ -15,15 +16,13 @@ export default function AuthPage() {
   const [view, setView] = useState<View>("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [phoneFocused, setPhoneFocused] = useState(false);
 
   // Form fields
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // login: username or email
+  const [email, setEmail] = useState(""); // forgot-password: email only
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -37,13 +36,31 @@ export default function AuthPage() {
 
   const handleLogin = async () => {
     clearMessages();
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError(t.auth.fillAllFields);
       return;
     }
     setLoading(true);
+
+    let loginEmail = identifier.trim();
+    if (!loginEmail.includes("@")) {
+      // Not an email — treat it as a username and resolve the real
+      // (possibly synthetic) email behind it.
+      const { data: match } = await supabase
+        .from("profiles")
+        .select("email")
+        .ilike("username", loginEmail)
+        .maybeSingle();
+      if (!match?.email) {
+        setLoading(false);
+        setError(t.auth.accountNotFound);
+        return;
+      }
+      loginEmail = match.email;
+    }
+
     const { error: err } = await supabase.auth.signInWithPassword({
-      email,
+      email: loginEmail,
       password,
     });
     setLoading(false);
@@ -56,7 +73,7 @@ export default function AuthPage() {
 
   const handleRegister = async () => {
     clearMessages();
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!username || !password || !confirmPassword) {
       setError(t.auth.fillAllFields);
       return;
     }
@@ -68,24 +85,62 @@ export default function AuthPage() {
       setError(t.auth.passwordTooShort);
       return;
     }
+    const cleanUsername = username.trim().toLowerCase();
+    if (!isValidUsername(cleanUsername)) {
+      setError(t.auth.usernameInvalid);
+      return;
+    }
     setLoading(true);
-    const { error: err } = await supabase.auth.signUp({
-      email,
+
+    const syntheticEmail = `${cleanUsername}@${SYNTHETIC_EMAIL_DOMAIN}`;
+    // No name is collected at signup — the username doubles as the display
+    // name until/unless the customer sets a real one via Edit Profile.
+    const firstNameVal = cleanUsername;
+    const lastNameVal = "";
+    const phoneVal = "";
+
+    const { data, error: err } = await supabase.auth.signUp({
+      email: syntheticEmail,
       password,
       options: {
         data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone ? `+389${phone}` : "",
+          first_name: firstNameVal,
+          last_name: lastNameVal,
+          phone: phoneVal,
+          username: cleanUsername,
         },
       },
     });
-    setLoading(false);
     if (err) {
-      setError(err.message);
+      setLoading(false);
+      setError(
+        err.message.toLowerCase().includes("already registered")
+          ? t.auth.usernameTaken
+          : err.message,
+      );
       return;
     }
+
+    if (data.user) {
+      // Explicit insert — there's no reliable DB trigger populating
+      // `profiles` from auth.users, and this row is what login-by-username
+      // and the barber panel's client search rely on.
+      await supabase.from("profiles").insert({
+        id: data.user.id,
+        email: syntheticEmail,
+        first_name: firstNameVal,
+        last_name: lastNameVal,
+        phone: phoneVal,
+        username: cleanUsername,
+        role: "member",
+      });
+    }
+
+    setLoading(false);
     setSuccess(t.auth.accountCreated);
+    if (data.session) {
+      router.push("/");
+    }
   };
 
   const handleForgot = async () => {
@@ -111,7 +166,6 @@ export default function AuthPage() {
       <style>{`
         @media (max-width: 480px) {
           .auth-card { padding: 28px 20px 24px !important; }
-          .auth-name-row { flex-direction: column !important; gap: 14px !important; }
         }
       `}</style>
       {/* ── Background grain overlay ── */}
@@ -163,12 +217,12 @@ export default function AuthPage() {
             {error && <p style={styles.errorMsg}>{error}</p>}
             {success && <p style={styles.successMsg}>{success}</p>}
 
-            <label style={styles.label}>{t.auth.email}</label>
+            <label style={styles.label}>{t.auth.usernameOrEmail}</label>
             <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder={t.auth.usernameOrEmail}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               style={styles.input}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
               onBlur={(e) =>
@@ -247,82 +301,12 @@ export default function AuthPage() {
             {error && <p style={styles.errorMsg}>{error}</p>}
             {success && <p style={styles.successMsg}>{success}</p>}
 
-            <div style={styles.row} className="auth-name-row">
-              <div style={{ flex: 1 }}>
-                <label style={styles.label}>{t.auth.firstName}</label>
-                <input
-                  type="text"
-                  placeholder={t.auth.firstName}
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  style={{ ...styles.input, marginBottom: 0 }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.borderColor = "#c9a961")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.1)")
-                  }
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={styles.label}>{t.auth.lastName}</label>
-                <input
-                  type="text"
-                  placeholder={t.auth.lastName}
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  style={{ ...styles.input, marginBottom: 0 }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.borderColor = "#c9a961")
-                  }
-                  onBlur={(e) =>
-                    (e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.1)")
-                  }
-                />
-              </div>
-            </div>
-
-            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.phone}</label>
-            <div
-              style={{
-                ...styles.phoneWrap,
-                borderRadius: 4,
-                border: `1px solid ${phoneFocused ? "#c9a961" : "rgba(255,255,255,0.1)"}`,
-                transition: "border-color 150ms",
-              }}
-            >
-              <span style={{ ...styles.phonePrefix, border: "none" }}>
-                🇲🇰 +389
-              </span>
-              <input
-                type="tel"
-                placeholder="70 000 000"
-                value={phone}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/[^0-9 ]/g, "");
-                  setPhone(digits);
-                }}
-                style={{
-                  ...styles.input,
-                  marginBottom: 0,
-                  border: "none",
-                  borderRadius: "0 4px 4px 0",
-                  flex: 1,
-                  outline: "none",
-                }}
-                onFocus={() => setPhoneFocused(true)}
-                onBlur={() => setPhoneFocused(false)}
-              />
-            </div>
-
-            <label style={{ ...styles.label, marginTop: 18 }}>{t.auth.email}</label>
+            <label style={styles.label}>{t.auth.username}</label>
             <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder={t.auth.username}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               style={styles.input}
               onFocus={(e) => (e.currentTarget.style.borderColor = "#c9a961")}
               onBlur={(e) =>
@@ -510,30 +494,6 @@ const styles: Record<string, React.CSSProperties> = {
     backdropFilter: "blur(18px)",
     boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)",
   },
-  phoneWrap: {
-    display: "flex",
-    alignItems: "stretch",
-    marginBottom: 0,
-    height: 48,
-  },
-  phonePrefix: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "0 14px",
-    background: "rgba(201,169,97,0.08)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRight: "none",
-    borderRadius: "4px 0 0 4px",
-    color: "#c9a961",
-    fontSize: 14,
-    fontWeight: 600,
-    letterSpacing: "0.05em",
-    whiteSpace: "nowrap" as const,
-    userSelect: "none" as const,
-    lineHeight: 1,
-    gap: 6,
-  },
   errorMsg: {
     background: "rgba(220,60,60,0.12)",
     border: "1px solid rgba(220,60,60,0.3)",
@@ -654,11 +614,6 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     fontFamily: "inherit",
     transition: "opacity 0.2s",
-  },
-  row: {
-    display: "flex",
-    gap: 14,
-    marginBottom: 0,
   },
   terms: {
     fontSize: 12,

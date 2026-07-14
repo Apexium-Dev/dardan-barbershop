@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { isSyntheticEmail } from "@/lib/syntheticEmail";
 import type { User } from "@supabase/supabase-js";
 import QRCode from "qrcode";
 import { Navbar } from "@/components/Navbar";
@@ -408,13 +409,16 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {/* Email — read only */}
+              {/* Email or Username — read only */}
               <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                 <label style={s.label}>
-                  {t.profile.email} <span style={s.readOnlyTag}>{t.profile.readOnly}</span>
+                  {isSyntheticEmail(user?.email) ? t.profile.username : t.profile.email}{" "}
+                  <span style={s.readOnlyTag}>{t.profile.readOnly}</span>
                 </label>
                 <p style={{ ...s.value, color: "rgba(255,255,255,0.4)" }}>
-                  {user?.email}
+                  {isSyntheticEmail(user?.email)
+                    ? user?.user_metadata?.username
+                    : user?.email}
                 </p>
               </div>
 
