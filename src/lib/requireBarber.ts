@@ -1,8 +1,10 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { hasBarberPinSession } from "@/lib/barberPinSession";
 
 export async function requireBarber(request: Request) {
+  if (hasBarberPinSession(request)) return null;
   const authorization = request.headers.get("authorization");
   const token = authorization?.match(/^Bearer (\S+)$/i)?.[1];
   if (!token) {
