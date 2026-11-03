@@ -34,23 +34,39 @@ same variables in the hosting provider. Public Supabase values are embedded in
 the frontend at build time, so changing them requires redeployment. Keep the
 service-role key server-only. Never commit actual credentials.
 
-## Follow-up work
+## Staff access and customer isolation
 
-The recovery deliberately preserves the legacy PIN-based barber workflow until
-its separate review. It does **not** resolve the following existing issues:
+Deploy the verified-session app changes before applying `secure_customer_access.sql`.
+That tracked migration removes public customer-data access and anonymous writes.
+Members can read their own profiles/visits; verified staff can find customers,
+log visits, and publish/delete gallery photos. Staff account/password APIs require
+a validated access token and a database-backed `barber` role. The old PIN no longer
+grants access. Existing staff sign in at `/auth?next=/barber`.
 
-- Anonymous profile/visit reads and visit/gallery writes are currently allowed.
-- Staff APIs use a PIN visible in the browser bundle instead of verified staff
-  authentication. Password-reset authorization needs particular attention.
-- Username-only accounts cannot receive email password-reset links at their
-  synthetic addresses. Recovery needs an explicit supported customer flow.
-- Loyalty redemption is calculated in the browser and needs transactional
-  database validation before concurrent or forged redemptions can be trusted.
-- Leaked-password protection is disabled in Auth.
+The visit trigger serializes reward accounting per customer, rejects unearned
+redemptions, and fills customer identity fields from the database. Ten paid visits
+earn one reward; two simultaneous redemption attempts cannot spend it twice.
+Existing customer rows and visit history are preserved.
 
-Do not call the entire site production-ready based only on the SQL checks. Verify
-real signup/login, profile editing, staff actions, storage uploads, and Realtime
-using a controlled test account after deployment.
+## Live verification on November 3, 2026
+
+- 29 member/public/security HTTP checks passed using a disposable test account.
+- 19 staff HTTP checks passed: account creation, duplicate rejection, password
+  reset, staff-target reset rejection, ten paid visits, concurrent redemption,
+  attribution, and photo upload/publication/view/delete.
+- Browser checks passed for member login, QR rendering, profile edit/save,
+  member rejection from the staff panel, sign-out, staff login, and translations.
+- The member loyalty display changed from 0/10 to 1/10 without a page reload
+  after a staff API visit insert, confirming Realtime delivery through RLS.
+- `tests/customer_access.sql` checks customer isolation, denied forgery,
+  staff capabilities, immutable visit history, and earned-reward accounting.
+
+Username-only customers now receive explicit shop-assisted recovery guidance.
+Legacy email accounts have a recovery form for choosing a new password after the
+recovery link. Email delivery and physical phone-camera scanning still require
+manual acceptance checks; neither is established by the API tests.
+Leaked-password protection remains disabled in Auth and should be enabled when
+available on the project's plan.
 
 ## Rollback and recovery
 

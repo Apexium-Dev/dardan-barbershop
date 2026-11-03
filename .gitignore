@@ -22,6 +22,7 @@ node_modules/
 .DS_Store
 *.pem
 *.log
+*.smoke.json
 *.env
 *.env.local
 *.env.development.local
