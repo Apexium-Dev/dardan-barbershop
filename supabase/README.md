@@ -17,6 +17,8 @@ Supabase migration `repair_profile_sync_and_loyalty_realtime`.
 
 Verification after the repair: 17 accounts, 17 profiles, 41 visits, 3 gallery
 records, no missing profiles or metadata-backed usernames, and visits published.
+`reconcile_profile_contacts.sql` then reconciles historical profile edits from
+Auth metadata without changing roles or identifiers.
 `tests/profile_repair.sql` verifies signup, metadata synchronization, preservation
 of legitimate staff roles, rejection of self-promotion, contact edits, and
 Realtime configuration. Its test account is rolled back, leaving no test data.
