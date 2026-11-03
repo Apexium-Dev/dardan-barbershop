@@ -49,7 +49,7 @@ export default function AuthPage() {
       const { data: match } = await supabase
         .from("profiles")
         .select("email")
-        .ilike("username", loginEmail)
+        .eq("username", loginEmail.toLowerCase())
         .maybeSingle();
       if (!match?.email) {
         setLoading(false);
@@ -121,20 +121,8 @@ export default function AuthPage() {
       return;
     }
 
-    if (data.user) {
-      // Explicit insert — there's no reliable DB trigger populating
-      // `profiles` from auth.users, and this row is what login-by-username
-      // and the barber panel's client search rely on.
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        email: syntheticEmail,
-        first_name: firstNameVal,
-        last_name: lastNameVal,
-        phone: phoneVal,
-        username: cleanUsername,
-        role: "member",
-      });
-    }
+    // The Auth trigger creates the profile atomically, including the username.
+    // Browser inserts would duplicate that row and cannot set account roles.
 
     setLoading(false);
     setSuccess(t.auth.accountCreated);

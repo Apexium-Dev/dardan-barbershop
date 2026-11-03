@@ -45,19 +45,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const { error: profileErr } = await supabaseAdmin.from("profiles").insert({
-    id: data.user.id,
-    email: syntheticEmail,
-    first_name: cleanUsername,
-    last_name: "",
-    phone: "",
-    username: cleanUsername,
-    role: "member",
-  });
-
-  if (profileErr) {
-    return NextResponse.json({ error: "profile_failed" }, { status: 500 });
-  }
+  // The Auth trigger creates the profile in the same transaction as the user.
+  // Inserting again would report failure after successfully creating an account.
 
   return NextResponse.json({ success: true });
 }
