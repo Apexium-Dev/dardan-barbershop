@@ -28,13 +28,17 @@ def request(url, method="GET", data=None, token=None, content_type="application/
     req = urllib.request.Request(url, headers=headers, method=method, data=payload)
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
-            body = response.read()
-            try:
-                return response.status, json.loads(body or "null")
-            except (json.JSONDecodeError, UnicodeDecodeError):
+            if "application/json" not in response.headers.get("Content-Type", ""):
+                response.read(1024)
                 return response.status, None
+            return response.status, json.load(response)
     except urllib.error.HTTPError as error:
-        return error.code, None
+        try:
+            return error.code, json.load(error)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return error.code, None
+    except (urllib.error.URLError, TimeoutError):
+        return 0, None
 
 
 def check(name, condition):
@@ -84,9 +88,10 @@ args.credentials_file.write_text(json.dumps(fixture))
 status, _ = request(base + "/rest/v1/gallery_photos", "POST", {"storage_path": fixture["negative_photo_path"]}, token)
 check("Member cannot publish photo metadata", status == 403)
 image = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=")
-status, _ = request(base + "/storage/v1/object/gallery/" + fixture["negative_photo_path"],
+status, error = request(base + "/storage/v1/object/gallery/" + fixture["negative_photo_path"],
     "POST", image, token, "image/png")
-check("Member cannot upload gallery image", status in (400, 401, 403))
+check("Member cannot upload gallery image", status in (401, 403)
+    or (status == 400 and "row-level security" in str(error).lower()))
 
 for route in ["create-account", "reset-password"]:
     url = args.site + "/api/barber/" + route
