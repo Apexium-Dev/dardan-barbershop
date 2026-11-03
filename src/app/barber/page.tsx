@@ -39,7 +39,6 @@ interface GalleryPhoto {
   caption: string | null;
 }
 
-const ACCESS_CODE = "0101";
 type BarberView = "menu" | "scan" | "gallery" | "reset" | "create";
 
 interface ClientResult {
@@ -57,8 +56,6 @@ export default function BarberPage() {
   const html5QrRef = useRef<any>(null);
 
   const [unlocked, setUnlocked] = useState(false);
-  const [pin, setPin] = useState("");
-  const [pinError, setPinError] = useState(false);
   const [view, setView] = useState<BarberView>("menu");
 
   const [scanning, setScanning] = useState(false);
@@ -94,6 +91,41 @@ export default function BarberPage() {
   const [createLoading, setCreateLoading] = useState(false);
   const [createMsg, setCreateMsg] = useState("");
   const [createError, setCreateError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const verifyStaff = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.replace("/auth?next=/barber");
+        return;
+      }
+      const { data: profile } = await supabase.from("profiles")
+        .select("role").eq("id", data.user.id).single();
+      if (profile?.role !== "barber") {
+        router.replace("/profile");
+        return;
+      }
+      if (active) setUnlocked(true);
+    };
+    void verifyStaff();
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setUnlocked(false);
+        router.replace("/auth?next=/barber");
+      }
+    });
+    return () => { active = false; listener.subscription.unsubscribe(); };
+  }, [router]);
+
+  const staffHeaders = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw new Error("Sign in required");
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${data.session.access_token}`,
+    };
+  };
 
   useEffect(() => {
     const q = clientQuery.trim();
@@ -137,9 +169,8 @@ export default function BarberPage() {
     try {
       const res = await fetch("/api/barber/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await staffHeaders(),
         body: JSON.stringify({
-          pin: ACCESS_CODE,
           userId: selectedClient.id,
           newPassword,
         }),
@@ -182,9 +213,8 @@ export default function BarberPage() {
     try {
       const res = await fetch("/api/barber/create-account", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await staffHeaders(),
         body: JSON.stringify({
-          pin: ACCESS_CODE,
           username: cleanUsername,
           password: newAccountPassword,
         }),
@@ -238,10 +268,11 @@ export default function BarberPage() {
 
   // Load recent visits + gallery
   useEffect(() => {
+    if (!unlocked) return;
     loadVisits();
     loadGallery();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [unlocked]);
 
   const galleryUrl = (path: string) =>
     supabase.storage.from("gallery").getPublicUrl(path).data.publicUrl;
@@ -401,38 +432,12 @@ export default function BarberPage() {
     stopScanner();
   };
 
-  // PIN pad
-  const handleDigit = (digit: string) => {
-    if (pinError || pin.length >= 4) return;
-    const next = pin + digit;
-    setPin(next);
-    if (next.length === 4) {
-      if (next === ACCESS_CODE) {
-        setTimeout(() => {
-          setUnlocked(true);
-          setView("menu");
-          setPin("");
-        }, 120);
-      } else {
-        setPinError(true);
-        setTimeout(() => {
-          setPin("");
-          setPinError(false);
-        }, 500);
-      }
-    }
-  };
-
-  const handleBackspace = () => {
-    if (pinError) return;
-    setPin((p) => p.slice(0, -1));
-  };
-
-  const lockPanel = () => {
+  const lockPanel = async () => {
     stopScanner();
     resetScan();
     setUnlocked(false);
-    setPin("");
+    await supabase.auth.signOut();
+    router.replace("/auth?next=/barber");
     setView("menu");
     setClientQuery("");
     setClientResults([]);
@@ -482,86 +487,6 @@ export default function BarberPage() {
           .barber-card { padding: 20px 16px; border-radius: 8px; }
         }
 
-        /* ── PIN lock screen ── */
-        .pin-wrap {
-          max-width: 340px;
-          margin: 40px auto 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-        }
-        .pin-dots {
-          display: flex;
-          gap: 16px;
-          margin: 28px 0 36px;
-        }
-        .pin-dot {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          border: 1px solid rgba(201,169,97,0.4);
-          background: transparent;
-          transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
-        }
-        .pin-dot.filled {
-          background: #c9a961;
-          border-color: #c9a961;
-        }
-        .pin-dots.error .pin-dot {
-          border-color: #f87171;
-          background: #f87171;
-        }
-        .pin-dots.error {
-          animation: pin-shake 420ms ease;
-        }
-        @keyframes pin-shake {
-          10%, 90% { transform: translateX(-2px); }
-          20%, 80% { transform: translateX(4px); }
-          30%, 50%, 70% { transform: translateX(-8px); }
-          40%, 60% { transform: translateX(8px); }
-        }
-        .pin-error-msg {
-          color: #f87171;
-          font-size: 12px;
-          height: 16px;
-          margin: -24px 0 20px;
-        }
-        .numpad {
-          display: grid;
-          grid-template-columns: repeat(3, 72px);
-          gap: 16px;
-        }
-        .num-key {
-          width: 72px;
-          height: 72px;
-          border-radius: 50%;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: rgba(255,255,255,0.03);
-          color: #fff;
-          font-size: 24px;
-          font-weight: 500;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 150ms ease, border-color 150ms ease;
-        }
-        .num-key:hover { background: rgba(201,169,97,0.12); border-color: rgba(201,169,97,0.4); }
-        .num-key:active { background: rgba(201,169,97,0.25); }
-        .num-key.ghost {
-          border: none;
-          background: transparent;
-          color: rgba(255,255,255,0.4);
-          font-size: 16px;
-        }
-        .num-key.ghost:hover { background: rgba(255,255,255,0.05); }
-        @media (max-width: 420px) {
-          .numpad { grid-template-columns: repeat(3, 64px); gap: 12px; }
-          .num-key { width: 64px; height: 64px; font-size: 22px; }
-        }
-
-        /* ── Menu screen ── */
         .barber-header-row {
           max-width: 900px;
           margin: 0 auto 32px;
@@ -785,53 +710,7 @@ export default function BarberPage() {
           }}
         />
 
-        {!unlocked && (
-          <div className="pin-wrap">
-            <p style={s.eyebrow}>{t.barber.barberPanel}</p>
-            <h1 style={{ ...s.title, fontSize: "clamp(24px, 4vw, 32px)" }}>
-              {t.barber.enterAccessCode}
-            </h1>
-            <div className={`pin-dots${pinError ? " error" : ""}`}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`pin-dot${i < pin.length ? " filled" : ""}`}
-                />
-              ))}
-            </div>
-            <p className="pin-error-msg">
-              {pinError ? t.barber.incorrectCode : ""}
-            </p>
-            <div className="numpad">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  className="num-key"
-                  onClick={() => handleDigit(d)}
-                >
-                  {d}
-                </button>
-              ))}
-              <span />
-              <button
-                type="button"
-                className="num-key"
-                onClick={() => handleDigit("0")}
-              >
-                0
-              </button>
-              <button
-                type="button"
-                className="num-key ghost"
-                onClick={handleBackspace}
-                aria-label="Backspace"
-              >
-                ⌫
-              </button>
-            </div>
-          </div>
-        )}
+        {!unlocked && <p style={{ textAlign: "center", color: "#c9a961" }} role="status">{t.auth.signingIn}</p>}
 
         {unlocked && (
         <div className="barber-header-row">

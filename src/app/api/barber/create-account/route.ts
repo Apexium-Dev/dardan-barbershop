@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { SYNTHETIC_EMAIL_DOMAIN, isValidUsername } from "@/lib/syntheticEmail";
-
-// Same 4-digit code as the barber panel's PIN pad (src/app/barber/page.tsx).
-// Not real access control — see reset-password/route.ts for the same note.
-const ACCESS_CODE = "0101";
+import { requireBarber } from "@/lib/requireBarber";
 
 export async function POST(req: Request) {
+  const denied = await requireBarber(req);
+  if (denied) return denied;
   const body = await req.json().catch(() => null);
-  const { pin, username, password } = body ?? {};
-
-  if (pin !== ACCESS_CODE) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const { username, password } = body ?? {};
 
   const cleanUsername =
     typeof username === "string" ? username.trim().toLowerCase() : "";

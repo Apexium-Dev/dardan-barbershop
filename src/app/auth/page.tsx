@@ -42,33 +42,27 @@ export default function AuthPage() {
     }
     setLoading(true);
 
-    let loginEmail = identifier.trim();
-    if (!loginEmail.includes("@")) {
-      // Not an email — treat it as a username and resolve the real
-      // (possibly synthetic) email behind it.
-      const { data: match } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("username", loginEmail.toLowerCase())
-        .maybeSingle();
-      if (!match?.email) {
-        setLoading(false);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.session) {
         setError(t.auth.accountNotFound);
         return;
       }
-      loginEmail = match.email;
+      const { error: sessionError } = await supabase.auth.setSession(result.session);
+      if (sessionError) throw sessionError;
+      // Only allow the known staff destination, never arbitrary redirect URLs.
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next === "/barber" ? "/barber" : "/profile");
+    } catch {
+      setError(t.auth.accountNotFound);
+    } finally {
+      setLoading(false);
     }
-
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password,
-    });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
-    }
-    router.push("/");
   };
 
   const handleRegister = async () => {
