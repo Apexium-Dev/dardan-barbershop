@@ -192,6 +192,8 @@ export interface Translations {
     resetClientPassword: string;
     searchClientPlaceholder: string;
     noClientsFound: string;
+    previousClients: string;
+    nextClients: string;
     newPassword: string;
     confirmNewPassword: string;
     resetPasswordBtn: string;
@@ -460,6 +462,8 @@ export const translations: Record<Language, Translations> = {
       resetClientPassword: "Reset Client Password",
       searchClientPlaceholder: "Search by name or username…",
       noClientsFound: "No clients found.",
+      previousClients: "Previous clients",
+      nextClients: "Next clients",
       newPassword: "New Password",
       confirmNewPassword: "Confirm New Password",
       resetPasswordBtn: "Reset Password",
@@ -766,6 +770,8 @@ export const translations: Record<Language, Translations> = {
       resetClientPassword: "Rivendos Fjalëkalimin e Klientit",
       searchClientPlaceholder: "Kërko sipas emrit ose emrit të përdoruesit…",
       noClientsFound: "Nuk u gjetën klientë.",
+      previousClients: "Klientët e mëparshëm",
+      nextClients: "Klientët e ardhshëm",
       newPassword: "Fjalëkalimi i Ri",
       confirmNewPassword: "Konfirmo Fjalëkalimin e Ri",
       resetPasswordBtn: "Rivendos Fjalëkalimin",
@@ -1072,6 +1078,8 @@ export const translations: Record<Language, Translations> = {
       resetClientPassword: "Ресетирај лозинка на клиент",
       searchClientPlaceholder: "Барај по име или корисничко име…",
       noClientsFound: "Не се пронајдени клиенти.",
+      previousClients: "Претходни клиенти",
+      nextClients: "Следни клиенти",
       newPassword: "Нова лозинка",
       confirmNewPassword: "Потврди нова лозинка",
       resetPasswordBtn: "Ресетирај лозинка",

@@ -35,9 +35,12 @@ export async function POST(request: Request) {
   switch (body?.action) {
     case "search": {
       const q = typeof body.query === "string" ? body.query.trim().replace(/[,.()%*]/g, "").slice(0, 80) : "";
-      if (q.length < 2) return result([], null);
-      const r = await supabaseAdmin.from("profiles").select("id, first_name, last_name, username")
-        .eq("role", "member").or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,username.ilike.%${q}%`).limit(10);
+      const page = Number.isSafeInteger(body.page) && body.page >= 0 ? body.page : 0;
+      let query = supabaseAdmin.from("profiles").select("id, first_name, last_name, username")
+        .eq("role", "member");
+      if (q) query = query.or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,username.ilike.%${q}%`);
+      const r = await query.order("username", { ascending: true, nullsFirst: false })
+        .order("id", { ascending: true }).range(page * 50, page * 50 + 50);
       return result(r.data, r.error);
     }
     case "recent-visits": {

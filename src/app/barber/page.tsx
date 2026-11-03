@@ -93,6 +93,9 @@ export default function BarberPage() {
   const [clientQuery, setClientQuery] = useState("");
   const [clientResults, setClientResults] = useState<ClientResult[]>([]);
   const [searchingClients, setSearchingClients] = useState(false);
+  const [clientPage, setClientPage] = useState(0);
+  const [hasMoreClients, setHasMoreClients] = useState(false);
+  const [clientLoadError, setClientLoadError] = useState("");
   const [selectedClient, setSelectedClient] = useState<ClientResult | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -108,23 +111,22 @@ export default function BarberPage() {
   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
-    const q = clientQuery.trim();
+    if (!unlocked || view !== "reset") return;
+    let cancelled = false;
+    setSearchingClients(true);
+    setClientLoadError("");
     const timeout = setTimeout(async () => {
-      if (q.length < 2) {
-        setClientResults([]);
-        return;
-      }
-      setSearchingClients(true);
-      // Strip characters meaningful to PostgREST's filter syntax before
-      // interpolating into .or() — this is a raw filter-expression string,
-      // not a parameterized query.
-      const safeQ = q.replace(/[,.()%*]/g, "");
-      const { data } = await barberRequest<ClientResult[]>("search", { query: safeQ });
-      setClientResults(data ?? []);
+      const { data, error } = await barberRequest<ClientResult[]>("search", {
+        query: clientQuery.trim(), page: clientPage,
+      });
+      if (cancelled) return;
+      setClientResults((data ?? []).slice(0, 50));
+      setHasMoreClients((data?.length ?? 0) > 50);
+      setClientLoadError(error?.message ?? "");
       setSearchingClients(false);
     }, 300);
-    return () => clearTimeout(timeout);
-  }, [clientQuery]);
+    return () => { cancelled = true; clearTimeout(timeout); };
+  }, [clientQuery, clientPage, unlocked, view]);
 
   const resetClientPassword = async () => {
     if (!selectedClient) return;
@@ -1192,20 +1194,29 @@ export default function BarberPage() {
                 type="text"
                 placeholder={t.barber.searchClientPlaceholder}
                 value={clientQuery}
-                onChange={(e) => setClientQuery(e.target.value)}
+                onChange={(e) => { setClientQuery(e.target.value); setClientPage(0); }}
                 className="client-search-input"
               />
               {searchingClients && <p style={s.dimText}>{t.barber.loading}</p>}
-              {!searchingClients &&
-                clientQuery.trim().length >= 2 &&
+              {clientLoadError && <p role="alert" style={s.errorMsg}>{clientLoadError}</p>}
+              {!searchingClients && !clientLoadError &&
                 clientResults.length === 0 && (
                   <p style={s.dimText}>{t.barber.noClientsFound}</p>
                 )}
-              {clientResults.map((c) => (
+              {!searchingClients && !clientLoadError && clientResults.map((c) => (
                 <div
                   key={c.id}
                   className="client-result-row"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedClient(c);
+                      setNewPassword(""); setConfirmNewPassword("");
+                      setResetMsg(""); setResetError("");
+                    }
+                  }}
                   onClick={() => {
+                    setNewPassword(""); setConfirmNewPassword("");
                     setSelectedClient(c);
                     setResetMsg("");
                     setResetError("");
@@ -1225,6 +1236,15 @@ export default function BarberPage() {
                   )}
                 </div>
               ))}
+              {!searchingClients && !clientLoadError && (clientPage > 0 || hasMoreClients) && (
+                <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 20 }}>
+                  <button type="button" className="change-client-btn" disabled={clientPage === 0}
+                    aria-label={t.barber.previousClients} onClick={() => setClientPage(p => p - 1)}>←</button>
+                  <span style={s.dimText}>{clientPage + 1}</span>
+                  <button type="button" className="change-client-btn" disabled={!hasMoreClients}
+                    aria-label={t.barber.nextClients} onClick={() => setClientPage(p => p + 1)}>→</button>
+                </div>
+              )}
             </>
           )}
 
@@ -1243,6 +1263,7 @@ export default function BarberPage() {
                 <button
                   type="button"
                   className="change-client-btn"
+                  disabled={resetLoading}
                   onClick={() => {
                     setSelectedClient(null);
                     setResetMsg("");
