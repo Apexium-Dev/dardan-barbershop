@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/lib/LanguageContext";
-import { SYNTHETIC_EMAIL_DOMAIN, isValidUsername } from "@/lib/syntheticEmail";
+import { SYNTHETIC_EMAIL_DOMAIN, isSyntheticEmail, isValidUsername } from "@/lib/syntheticEmail";
 
-type View = "login" | "register" | "forgot";
+type View = "login" | "register" | "forgot" | "reset";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -28,6 +28,18 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setView("reset");
+    });
+    if (new URLSearchParams(window.location.search).get("recovery") === "1") {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (data.session) setView("reset");
+      });
+    }
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   const clearMessages = () => {
     setError("");
@@ -50,7 +62,7 @@ export default function AuthPage() {
       });
       const result = await response.json();
       if (!response.ok || !result.session) {
-        setError(t.auth.accountNotFound);
+        setError(t.auth.invalidCredentials);
         return;
       }
       const { error: sessionError } = await supabase.auth.setSession(result.session);
@@ -59,7 +71,7 @@ export default function AuthPage() {
       const next = new URLSearchParams(window.location.search).get("next");
       router.push(next === "/barber" ? "/barber" : "/profile");
     } catch {
-      setError(t.auth.accountNotFound);
+      setError(t.auth.invalidCredentials);
     } finally {
       setLoading(false);
     }
@@ -131,9 +143,13 @@ export default function AuthPage() {
       setError(t.auth.enterEmail);
       return;
     }
+    if (isSyntheticEmail(email.trim().toLowerCase())) {
+      setError(t.auth.usernameRecoveryHint);
+      return;
+    }
     setLoading(true);
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth?recovery=1`,
     });
     setLoading(false);
     if (err) {
@@ -141,6 +157,33 @@ export default function AuthPage() {
       return;
     }
     setSuccess(t.auth.resetSent);
+  };
+
+  const handleReset = async () => {
+    clearMessages();
+    if (password !== confirmPassword) {
+      setError(t.auth.passwordsNoMatch);
+      return;
+    }
+    if (password.length < 6) {
+      setError(t.auth.passwordTooShort);
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      await supabase.auth.signOut();
+      setPassword("");
+      setConfirmPassword("");
+      setView("login");
+      setSuccess(t.auth.passwordUpdated);
+      window.history.replaceState(null, "", "/auth");
+    } catch {
+      setError(t.auth.invalidCredentials);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -392,6 +435,10 @@ export default function AuthPage() {
             {success && <p style={styles.successMsg}>{success}</p>}
 
             <p style={styles.hint}>{t.auth.resetHint}</p>
+            <p style={styles.hint}>
+              {t.auth.usernameRecoveryHint}{" "}
+              <a href="tel:+38972646141" style={styles.link}>+389 72 646 141</a>
+            </p>
 
             <label style={styles.label}>{t.auth.email}</label>
             <input
@@ -424,6 +471,22 @@ export default function AuthPage() {
               type="button"
             >
               <BackArrow /> {t.auth.backToSignIn}
+            </button>
+          </div>
+        )}
+        {view === "reset" && (
+          <div style={styles.form}>
+            <h1 style={styles.title}>{t.auth.resetTitle1} <em>{t.auth.resetTitle2}</em></h1>
+            <div style={styles.divider} />
+            {error && <p style={styles.errorMsg} role="alert">{error}</p>}
+            <label htmlFor="recovery-password" style={styles.label}>{t.auth.password}</label>
+            <input id="recovery-password" type="password" autoComplete="new-password"
+              value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+            <label htmlFor="recovery-confirm" style={{ ...styles.label, marginTop: 18 }}>{t.auth.confirmPassword}</label>
+            <input id="recovery-confirm" type="password" autoComplete="new-password"
+              value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} style={styles.input} />
+            <button type="button" style={styles.primary} disabled={loading} onClick={handleReset}>
+              {loading ? t.auth.sending : `${t.auth.resetTitle1} ${t.auth.resetTitle2}`}
             </button>
           </div>
         )}

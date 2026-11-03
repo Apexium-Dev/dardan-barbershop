@@ -117,6 +117,9 @@ export interface Translations {
     usernameInvalid: string;
     usernameTaken: string;
     accountNotFound: string;
+    invalidCredentials: string;
+    usernameRecoveryHint: string;
+    passwordUpdated: string;
   };
   profile: {
     account: string;
@@ -382,6 +385,9 @@ export const translations: Record<Language, Translations> = {
         "Username can only use letters, numbers, dots, underscores, and hyphens (3–20 characters).",
       usernameTaken: "That username is already taken.",
       accountNotFound: "No account found with that username.",
+      invalidCredentials: "Incorrect username, email, or password. Please try again.",
+      usernameRecoveryHint: "If you registered with a username only, contact the barbershop to reset your password.",
+      passwordUpdated: "Password updated. Sign in with your new password.",
     },
     profile: {
       account: "Account",
@@ -685,6 +691,9 @@ export const translations: Record<Language, Translations> = {
         "Emri i përdoruesit mund të përmbajë vetëm shkronja, numra, pika, nënvija dhe vija (3–20 karaktere).",
       usernameTaken: "Ky emër përdoruesi është tashmë i zënë.",
       accountNotFound: "Nuk u gjet asnjë llogari me këtë emër përdoruesi.",
+      invalidCredentials: "Emri i përdoruesit, email-i ose fjalëkalimi është i pasaktë. Provoni përsëri.",
+      usernameRecoveryHint: "Nëse u regjistruat vetëm me emër përdoruesi, kontaktoni berberhanen për të rivendosur fjalëkalimin.",
+      passwordUpdated: "Fjalëkalimi u ndryshua. Kyçuni me fjalëkalimin e ri.",
     },
     profile: {
       account: "Llogaria",
@@ -988,6 +997,9 @@ export const translations: Record<Language, Translations> = {
         "Корисничкото име може да содржи само букви, бројки, точки, долни црти и цртички (3–20 карактери).",
       usernameTaken: "Ова корисничко име е веќе зафатено.",
       accountNotFound: "Не е пронајден профил со тоа корисничко име.",
+      invalidCredentials: "Неточно корисничко име, е-пошта или лозинка. Обидете се повторно.",
+      usernameRecoveryHint: "Ако се регистриравте само со корисничко име, контактирајте ја берберницата за ресетирање на лозинката.",
+      passwordUpdated: "Лозинката е променета. Најавете се со новата лозинка.",
     },
     profile: {
       account: "Профил",
