@@ -1,0 +1,46 @@
+name: Database health
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  database-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read public gallery metadata
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        shell: python
+        run: |
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          url = os.environ.get("SUPABASE_URL", "").rstrip("/")
+          key = os.environ.get("SUPABASE_PUBLISHABLE_KEY", "")
+          if not url.startswith("https://") or not key:
+              raise SystemExit("Configure the Supabase URL and publishable key repository variables.")
+          request = urllib.request.Request(
+              url + "/rest/v1/gallery_photos?select=id&limit=1",
+              headers={"apikey": key, "Accept": "application/json"},
+          )
+          for attempt in range(3):
+              try:
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      rows = json.load(response)
+                  if not isinstance(rows, list):
+                      raise SystemExit("Unexpected database response.")
+                  print("Database query succeeded; no data was changed.")
+                  break
+              except (urllib.error.URLError, TimeoutError):
+                  if attempt == 2:
+                      raise SystemExit("Database query failed after three attempts. Check Supabase project status.")
+                  time.sleep(5)

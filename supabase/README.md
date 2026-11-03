@@ -59,3 +59,19 @@ Reverting a Git commit does **not** roll back an applied database migration.
 Preserve the recovered profiles; prefer a new corrective migration rather than
 deleting customer rows or restoring the vulnerable trigger. Back up the project
 before further database changes.
+
+## Daily database health check
+
+The `Database health` GitHub Action reads at most one public gallery ID daily at
+07:17 UTC and can also be run manually. It requires repository variables
+`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`; no service-role key is used.
+An empty gallery is healthy too. It never inserts test data or logs customer data.
+Failures appear in GitHub Actions; configure GitHub notification preferences to
+receive workflow-failure alerts.
+
+This generates database activity, but does not guarantee a Free project will stay
+active or resume one that is already paused. Scheduled workflows can be delayed;
+GitHub can disable public-repository schedules after 60 days without repository
+activity. For client uptime requirements, use a paid Supabase plan, which is not
+subject to inactivity pausing. See [Supabase's pausing guide](https://supabase.com/docs/guides/platform/free-project-pausing)
+and [GitHub's schedule limits](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
