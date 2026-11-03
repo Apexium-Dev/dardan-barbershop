@@ -38,10 +38,13 @@ service-role key server-only. Never commit actual credentials.
 
 Deploy the verified-session app changes before applying `secure_customer_access.sql`.
 That tracked migration removes public customer-data access and anonymous writes.
-Members can read their own profiles/visits; verified staff can find customers,
-log visits, and publish/delete gallery photos. Staff account/password APIs require
-a validated access token and a database-backed `barber` role. The old PIN no longer
-grants access. Existing staff sign in at `/auth?next=/barber`.
+Members can read their own profiles/visits. The barber panel uses the requested
+`0101` PIN at `/barber`, without requiring an account login. The server validates
+the PIN and issues a signed HttpOnly cookie for eight hours. Protected panel
+operations go through `/api/barber/data`; customer tables remain private. Lock
+clears that session. Existing verified barber tokens also remain supported by
+the account/password APIs. PIN sessions do not identify an individual barber,
+so visits entered with the shared PIN have no individual `barber_id` attribution.
 
 The visit trigger serializes reward accounting per customer, rejects unearned
 redemptions, and fills customer identity fields from the database. Ten paid visits

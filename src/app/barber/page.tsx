@@ -39,6 +39,19 @@ interface GalleryPhoto {
   caption: string | null;
 }
 
+async function barberRequest<T>(action: string, values: Record<string, unknown> = {}) {
+  try {
+    const response = await fetch("/api/barber/data", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...values }),
+    });
+    const result = await response.json();
+    return { data: (result.data ?? null) as T | null,
+      error: response.ok ? null : { message: result.error?.message ?? "Panel locked. Enter the code again." } };
+  } catch {
+    return { data: null as T | null, error: { message: "Connection failed. Please try again." } };
+  }
+}
 type BarberView = "menu" | "scan" | "gallery" | "reset" | "create";
 
 interface ClientResult {
@@ -56,6 +69,8 @@ export default function BarberPage() {
   const html5QrRef = useRef<any>(null);
 
   const [unlocked, setUnlocked] = useState(false);
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState(false);
   const [view, setView] = useState<BarberView>("menu");
 
   const [scanning, setScanning] = useState(false);
@@ -93,41 +108,6 @@ export default function BarberPage() {
   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
-    let active = true;
-    const verifyStaff = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace("/auth?next=/barber");
-        return;
-      }
-      const { data: profile } = await supabase.from("profiles")
-        .select("role").eq("id", data.user.id).single();
-      if (profile?.role !== "barber") {
-        router.replace("/profile");
-        return;
-      }
-      if (active) setUnlocked(true);
-    };
-    void verifyStaff();
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        setUnlocked(false);
-        router.replace("/auth?next=/barber");
-      }
-    });
-    return () => { active = false; listener.subscription.unsubscribe(); };
-  }, [router]);
-
-  const staffHeaders = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) throw new Error("Sign in required");
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${data.session.access_token}`,
-    };
-  };
-
-  useEffect(() => {
     const q = clientQuery.trim();
     const timeout = setTimeout(async () => {
       if (q.length < 2) {
@@ -139,14 +119,7 @@ export default function BarberPage() {
       // interpolating into .or() — this is a raw filter-expression string,
       // not a parameterized query.
       const safeQ = q.replace(/[,.()%*]/g, "");
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, username")
-        .eq("role", "member")
-        .or(
-          `first_name.ilike.%${safeQ}%,last_name.ilike.%${safeQ}%,username.ilike.%${safeQ}%`,
-        )
-        .limit(10);
+      const { data } = await barberRequest<ClientResult[]>("search", { query: safeQ });
       setClientResults(data ?? []);
       setSearchingClients(false);
     }, 300);
@@ -169,7 +142,7 @@ export default function BarberPage() {
     try {
       const res = await fetch("/api/barber/reset-password", {
         method: "POST",
-        headers: await staffHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: selectedClient.id,
           newPassword,
@@ -213,7 +186,7 @@ export default function BarberPage() {
     try {
       const res = await fetch("/api/barber/create-account", {
         method: "POST",
-        headers: await staffHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: cleanUsername,
           password: newAccountPassword,
@@ -242,11 +215,7 @@ export default function BarberPage() {
   const loadVisits = async () => {
     setLoadingVisits(true);
     try {
-      const { data } = await supabase
-        .from("visits")
-        .select("id, scanned_at, notes, customer_email, customer_name, is_redemption")
-        .order("scanned_at", { ascending: false })
-        .limit(10);
+      const { data } = await barberRequest<Visit[]>("recent-visits");
       setRecentVisits(data ?? []);
     } finally {
       setLoadingVisits(false);
@@ -286,28 +255,21 @@ export default function BarberPage() {
     setUploadError("");
     setUploading(true);
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${crypto.randomUUID()}.${ext}`;
-
-    const { error: uploadErr } = await supabase.storage
-      .from("gallery")
-      .upload(path, file);
-
-    if (uploadErr) {
+    const form = new FormData();
+    form.set("file", file);
+    form.set("caption", uploadCaption.trim());
+    try {
+      const response = await fetch("/api/barber/data?action=upload-photo", { method: "POST", body: form });
+      const body = await response.json();
+      if (!response.ok) {
+        setUploadError(body.error?.message ?? "Upload failed");
+        return;
+      }
+    } catch {
+      setUploadError("Upload failed. Please try again.");
+      return;
+    } finally {
       setUploading(false);
-      setUploadError("Upload failed: " + uploadErr.message);
-      return;
-    }
-
-    const { error: insertErr } = await supabase.from("gallery_photos").insert({
-      storage_path: path,
-      caption: uploadCaption.trim() || null,
-    });
-
-    setUploading(false);
-    if (insertErr) {
-      setUploadError("Save failed: " + insertErr.message);
-      return;
     }
 
     setUploadCaption("");
@@ -317,16 +279,13 @@ export default function BarberPage() {
 
   const handleDeletePhoto = async (photo: GalleryPhoto) => {
     if (!window.confirm(t.barber.confirmRemovePhoto)) return;
-    await supabase.storage.from("gallery").remove([photo.storage_path]);
-    await supabase.from("gallery_photos").delete().eq("id", photo.id);
+    const { error } = await barberRequest("delete-photo", { photoId: photo.id });
+    if (error) { setUploadError(error.message); return; }
     loadGallery();
   };
 
   const fetchLoyalty = async (userId: string) => {
-    const { data } = await supabase
-      .from("visits")
-      .select("is_redemption")
-      .eq("user_id", userId);
+    const { data } = await barberRequest<{ is_redemption: boolean }[]>("loyalty", { userId });
     const paid = (data ?? []).filter((v) => !v.is_redemption).length;
     const redeemed = (data ?? []).filter((v) => v.is_redemption).length;
     const earned = Math.floor(paid / 10);
@@ -381,15 +340,8 @@ export default function BarberPage() {
 
   const fetchCustomer = async (userId: string) => {
     setScanError("");
-    // Use admin-safe RPC or fetch user metadata via service — here we use the visits table lookup
-    // We store customer info when saving, so for preview we call our own edge or just show the ID
-    // Instead, we call getUserById via supabase admin — but from client we use auth.users indirectly.
-    // We'll fetch from the profiles table if it exists, otherwise use a lightweight fetch.
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, email, first_name, last_name, phone, created_at")
-      .eq("id", userId)
-      .single();
+    // The server checks the PIN session before returning customer details.
+    const { data, error } = await barberRequest<CustomerInfo>("customer", { userId });
 
     if (error || !data) {
       setScanError(t.barber.memberNotFound);
@@ -404,12 +356,8 @@ export default function BarberPage() {
     setSaving(true);
     setSavedMsg("");
 
-    const { error } = await supabase.from("visits").insert({
-      user_id: customer.id,
-      notes: notes.trim() || null,
-      customer_email: customer.email,
-      customer_name: `${customer.first_name} ${customer.last_name}`.trim(),
-      is_redemption: isRedemption,
+    const { error } = await barberRequest("save-visit", {
+      userId: customer.id, notes: notes.trim(), isRedemption,
     });
 
     setSaving(false);
@@ -432,12 +380,42 @@ export default function BarberPage() {
     stopScanner();
   };
 
+  // PIN pad
+  const handleDigit = async (digit: string) => {
+    if (pinError || pin.length >= 4) return;
+    const next = pin + digit;
+    setPin(next);
+    if (next.length === 4) {
+      try {
+        const response = await fetch("/api/barber/session", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pin: next }),
+        });
+        if (!response.ok) throw new Error("Incorrect code");
+        setUnlocked(true);
+        setView("menu");
+        setPin("");
+      } catch {
+        setPinError(true);
+        setTimeout(() => {
+          setPin("");
+          setPinError(false);
+        }, 500);
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    if (pinError) return;
+    setPin((p) => p.slice(0, -1));
+  };
+
   const lockPanel = async () => {
     stopScanner();
     resetScan();
     setUnlocked(false);
-    await supabase.auth.signOut();
-    router.replace("/auth?next=/barber");
+    await fetch("/api/barber/session", { method: "DELETE" });
+    setPin("");
     setView("menu");
     setClientQuery("");
     setClientResults([]);
@@ -487,6 +465,86 @@ export default function BarberPage() {
           .barber-card { padding: 20px 16px; border-radius: 8px; }
         }
 
+        /* ── PIN lock screen ── */
+        .pin-wrap {
+          max-width: 340px;
+          margin: 40px auto 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .pin-dots {
+          display: flex;
+          gap: 16px;
+          margin: 28px 0 36px;
+        }
+        .pin-dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 1px solid rgba(201,169,97,0.4);
+          background: transparent;
+          transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+        }
+        .pin-dot.filled {
+          background: #c9a961;
+          border-color: #c9a961;
+        }
+        .pin-dots.error .pin-dot {
+          border-color: #f87171;
+          background: #f87171;
+        }
+        .pin-dots.error {
+          animation: pin-shake 420ms ease;
+        }
+        @keyframes pin-shake {
+          10%, 90% { transform: translateX(-2px); }
+          20%, 80% { transform: translateX(4px); }
+          30%, 50%, 70% { transform: translateX(-8px); }
+          40%, 60% { transform: translateX(8px); }
+        }
+        .pin-error-msg {
+          color: #f87171;
+          font-size: 12px;
+          height: 16px;
+          margin: -24px 0 20px;
+        }
+        .numpad {
+          display: grid;
+          grid-template-columns: repeat(3, 72px);
+          gap: 16px;
+        }
+        .num-key {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.03);
+          color: #fff;
+          font-size: 24px;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 150ms ease, border-color 150ms ease;
+        }
+        .num-key:hover { background: rgba(201,169,97,0.12); border-color: rgba(201,169,97,0.4); }
+        .num-key:active { background: rgba(201,169,97,0.25); }
+        .num-key.ghost {
+          border: none;
+          background: transparent;
+          color: rgba(255,255,255,0.4);
+          font-size: 16px;
+        }
+        .num-key.ghost:hover { background: rgba(255,255,255,0.05); }
+        @media (max-width: 420px) {
+          .numpad { grid-template-columns: repeat(3, 64px); gap: 12px; }
+          .num-key { width: 64px; height: 64px; font-size: 22px; }
+        }
+
+        /* ── Menu screen ── */
         .barber-header-row {
           max-width: 900px;
           margin: 0 auto 32px;
@@ -710,7 +768,53 @@ export default function BarberPage() {
           }}
         />
 
-        {!unlocked && <p style={{ textAlign: "center", color: "#c9a961" }} role="status">{t.auth.signingIn}</p>}
+        {!unlocked && (
+          <div className="pin-wrap">
+            <p style={s.eyebrow}>{t.barber.barberPanel}</p>
+            <h1 style={{ ...s.title, fontSize: "clamp(24px, 4vw, 32px)" }}>
+              {t.barber.enterAccessCode}
+            </h1>
+            <div className={`pin-dots${pinError ? " error" : ""}`}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`pin-dot${i < pin.length ? " filled" : ""}`}
+                />
+              ))}
+            </div>
+            <p className="pin-error-msg">
+              {pinError ? t.barber.incorrectCode : ""}
+            </p>
+            <div className="numpad">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className="num-key"
+                  onClick={() => handleDigit(d)}
+                >
+                  {d}
+                </button>
+              ))}
+              <span />
+              <button
+                type="button"
+                className="num-key"
+                onClick={() => handleDigit("0")}
+              >
+                0
+              </button>
+              <button
+                type="button"
+                className="num-key ghost"
+                onClick={handleBackspace}
+                aria-label="Backspace"
+              >
+                ⌫
+              </button>
+            </div>
+          </div>
+        )}
 
         {unlocked && (
         <div className="barber-header-row">
