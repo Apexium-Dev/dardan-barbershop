@@ -189,6 +189,11 @@ export interface Translations {
     addPhotoToGallery: string;
     backToMenu: string;
     lock: string;
+    clients: string;
+    paidVisits: string;
+    noRewardAvailable: string;
+    addVisit: string;
+    retryClient: string;
     resetClientPassword: string;
     searchClientPlaceholder: string;
     noClientsFound: string;
@@ -459,6 +464,11 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Add Photo to Gallery",
       backToMenu: "← Back to menu",
       lock: "Lock",
+      clients: "Clients",
+      paidVisits: "Paid visits",
+      noRewardAvailable: "No free haircut available yet.",
+      addVisit: "Add visit",
+      retryClient: "Try again",
       resetClientPassword: "Reset Client Password",
       searchClientPlaceholder: "Search by name or username…",
       noClientsFound: "No clients found.",
@@ -767,6 +777,11 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Shto Foto në Galeri",
       backToMenu: "← Kthehu te menuja",
       lock: "Kyç",
+      clients: "Klientët",
+      paidVisits: "Vizita të paguara",
+      noRewardAvailable: "Ende nuk ka prerje falas në dispozicion.",
+      addVisit: "Shto vizitë",
+      retryClient: "Provo përsëri",
       resetClientPassword: "Rivendos Fjalëkalimin e Klientit",
       searchClientPlaceholder: "Kërko sipas emrit ose emrit të përdoruesit…",
       noClientsFound: "Nuk u gjetën klientë.",
@@ -1075,6 +1090,11 @@ export const translations: Record<Language, Translations> = {
       addPhotoToGallery: "Додај фотографија во галерија",
       backToMenu: "← Назад кон менито",
       lock: "Заклучи",
+      clients: "Клиенти",
+      paidVisits: "Платени посети",
+      noRewardAvailable: "Сè уште нема достапно бесплатно шишање.",
+      addVisit: "Додај посета",
+      retryClient: "Обиди се повторно",
       resetClientPassword: "Ресетирај лозинка на клиент",
       searchClientPlaceholder: "Барај по име или корисничко име…",
       noClientsFound: "Не се пронајдени клиенти.",

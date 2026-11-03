@@ -52,7 +52,7 @@ async function barberRequest<T>(action: string, values: Record<string, unknown> 
     return { data: null as T | null, error: { message: "Connection failed. Please try again." } };
   }
 }
-type BarberView = "menu" | "scan" | "gallery" | "reset" | "create";
+type BarberView = "menu" | "scan" | "gallery" | "clients" | "create";
 
 interface ClientResult {
   id: string;
@@ -99,6 +99,9 @@ export default function BarberPage() {
   const [selectedClient, setSelectedClient] = useState<ClientResult | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [loadingClient, setLoadingClient] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const savingVisitRef = useRef(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
   const [resetError, setResetError] = useState("");
@@ -111,7 +114,7 @@ export default function BarberPage() {
   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
-    if (!unlocked || view !== "reset") return;
+    if (!unlocked || view !== "clients") return;
     let cancelled = false;
     setSearchingClients(true);
     setClientLoadError("");
@@ -287,7 +290,12 @@ export default function BarberPage() {
   };
 
   const fetchLoyalty = async (userId: string) => {
-    const { data } = await barberRequest<{ is_redemption: boolean }[]>("loyalty", { userId });
+    const { data, error } = await barberRequest<{ is_redemption: boolean }[]>("loyalty", { userId });
+    if (error || !data) {
+      setLoyalty(null);
+      setScanError(error?.message ?? t.barber.memberNotFound);
+      return;
+    }
     const paid = (data ?? []).filter((v) => !v.is_redemption).length;
     const redeemed = (data ?? []).filter((v) => v.is_redemption).length;
     const earned = Math.floor(paid / 10);
@@ -354,23 +362,33 @@ export default function BarberPage() {
   };
 
   const saveVisit = async (isRedemption = false) => {
-    if (!customer) return;
+    if (!customer || !loyalty || savingVisitRef.current || (isRedemption && loyalty.available < 1)) return;
+    savingVisitRef.current = true;
     setSaving(true);
+    setScanError("");
     setSavedMsg("");
 
     const { error } = await barberRequest("save-visit", {
       userId: customer.id, notes: notes.trim(), isRedemption,
     });
 
-    setSaving(false);
     if (error) {
+      savingVisitRef.current = false;
+      setSaving(false);
       setScanError("Save failed: " + error.message);
       return;
     }
     setSavedMsg(isRedemption ? "🎁 " + t.barber.redemptionSaved : t.barber.visitSaved);
     setNotes("");
-    setCustomer(null);
-    setLoyalty(null);
+    if (view === "clients") {
+      setLoyalty(null);
+      await fetchLoyalty(customer.id);
+    } else {
+      setCustomer(null);
+      setLoyalty(null);
+    }
+    savingVisitRef.current = false;
+    setSaving(false);
     loadVisits();
   };
 
@@ -380,6 +398,17 @@ export default function BarberPage() {
     setSavedMsg("");
     setNotes("");
     stopScanner();
+  };
+
+  const selectClient = async (client: ClientResult) => {
+    setSelectedClient(client);
+    setCustomer(null); setLoyalty(null);
+    setNotes(""); setSavedMsg(""); setScanError("");
+    setNewPassword(""); setConfirmNewPassword("");
+    setResetMsg(""); setResetError(""); setShowPasswordReset(false);
+    setLoadingClient(true);
+    await fetchCustomer(client.id);
+    setLoadingClient(false);
   };
 
   // PIN pad
@@ -827,7 +856,7 @@ export default function BarberPage() {
             </h1>
             <div style={s.divider} />
           </div>
-          <button type="button" className="lock-btn" onClick={lockPanel}>
+          <button type="button" className="lock-btn" disabled={saving || loadingClient || resetLoading} onClick={lockPanel}>
             🔒 {t.barber.lock}
           </button>
         </div>
@@ -837,8 +866,8 @@ export default function BarberPage() {
           <div className="menu-grid">
             <div
               className="menu-btn"
-              onClick={() => setView("scan")}
-              onKeyDown={(e) => e.key === "Enter" && setView("scan")}
+              onClick={() => { resetScan(); setView("scan"); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { resetScan(); setView("scan"); } }}
               role="button"
               tabIndex={0}
             >
@@ -859,14 +888,14 @@ export default function BarberPage() {
             </div>
             <div
               className="menu-btn"
-              onClick={() => setView("reset")}
-              onKeyDown={(e) => e.key === "Enter" && setView("reset")}
+              onClick={() => { setSelectedClient(null); setView("clients"); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { setSelectedClient(null); setView("clients"); } }}
               role="button"
               tabIndex={0}
             >
-              <span className="menu-btn-icon">🔑</span>
+              <span className="menu-btn-icon">👥</span>
               <span className="menu-btn-label">
-                {t.barber.resetClientPassword}
+                {t.barber.clients}
               </span>
             </div>
             <div
@@ -1015,7 +1044,7 @@ export default function BarberPage() {
                       flex: 1,
                     }}
                     onClick={() => saveVisit(false)}
-                    disabled={saving}
+                    disabled={saving || !loyalty}
                     type="button"
                   >
                     {saving ? t.barber.saving : t.barber.saveVisit}
@@ -1171,12 +1200,13 @@ export default function BarberPage() {
         </>
         )}
 
-        {view === "reset" && unlocked && (
+        {view === "clients" && unlocked && (
         <>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <button
             type="button"
             className="back-btn"
+            disabled={saving || loadingClient || resetLoading}
             onClick={() => setView("menu")}
           >
             {t.barber.backToMenu}
@@ -1186,7 +1216,7 @@ export default function BarberPage() {
           className="barber-card"
           style={{ maxWidth: 900, margin: "0 auto" }}
         >
-          <p style={s.cardLabel}>{t.barber.resetClientPassword}</p>
+          <p style={s.cardLabel}>{t.barber.clients}</p>
 
           {!selectedClient && (
             <>
@@ -1210,17 +1240,10 @@ export default function BarberPage() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setSelectedClient(c);
-                      setNewPassword(""); setConfirmNewPassword("");
-                      setResetMsg(""); setResetError("");
+                      void selectClient(c);
                     }
                   }}
-                  onClick={() => {
-                    setNewPassword(""); setConfirmNewPassword("");
-                    setSelectedClient(c);
-                    setResetMsg("");
-                    setResetError("");
-                  }}
+                  onClick={() => void selectClient(c)}
                   role="button"
                   tabIndex={0}
                 >
@@ -1263,7 +1286,7 @@ export default function BarberPage() {
                 <button
                   type="button"
                   className="change-client-btn"
-                  disabled={resetLoading}
+                  disabled={resetLoading || saving || loadingClient}
                   onClick={() => {
                     setSelectedClient(null);
                     setResetMsg("");
@@ -1274,6 +1297,45 @@ export default function BarberPage() {
                 </button>
               </div>
 
+              {loadingClient && <p style={s.dimText}>{t.barber.loading}</p>}
+              {scanError && <p role="alert" style={s.errorMsg}>{scanError}</p>}
+              {savedMsg && <p role="status" style={s.successMsg}>{savedMsg}</p>}
+              {!loadingClient && customer && loyalty && (
+                <div className="loyalty-block">
+                  <p style={s.customerDetail}>{t.barber.paidVisits}: {loyalty.paidVisits}</p>
+                  <div className="loyalty-header">
+                    <span className="loyalty-label">{t.barber.loyaltyProgress}</span>
+                    <span className="loyalty-count">{loyalty.progress} / 10</span>
+                  </div>
+                  <div className="loyalty-dots">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <div key={i} className={`loyalty-dot${i < loyalty.progress ? " filled" : ""}`} />
+                    ))}
+                  </div>
+                  <p style={s.dimText}>
+                    {loyalty.available > 0
+                      ? `🎁 ${loyalty.available} ${loyalty.available > 1 ? t.barber.freeHaircutPluralAvailable : t.barber.freeHaircutSingularAvailable}`
+                      : t.barber.noRewardAvailable}
+                  </p>
+                  <button type="button" style={{ ...s.primaryBtn, width: "100%", marginTop: 16 }}
+                    disabled={saving} onClick={() => saveVisit(false)}>
+                    {saving ? t.barber.saving : t.barber.addVisit}
+                  </button>
+                  {loyalty.available > 0 && (
+                    <button type="button" className="redeem-btn" disabled={saving}
+                      onClick={() => saveVisit(true)}>{t.barber.redeemFreeHaircut}</button>
+                  )}
+                </div>
+              )}
+              {!loadingClient && (!customer || !loyalty) && (
+                <button type="button" style={s.ghostBtn} onClick={() => void selectClient(selectedClient)}>
+                  {t.barber.retryClient}
+                </button>
+              )}
+              <button type="button" className="change-client-btn" style={{ marginTop: 24 }}
+                aria-expanded={showPasswordReset} disabled={saving || resetLoading}
+                onClick={() => setShowPasswordReset(v => !v)}>{t.barber.resetClientPassword}</button>
+              {showPasswordReset && (<>
               <label style={{ ...s.label, marginTop: 4 }}>
                 {t.barber.newPassword}
               </label>
@@ -1309,6 +1371,7 @@ export default function BarberPage() {
               >
                 {resetLoading ? t.barber.resetting : t.barber.resetPasswordBtn}
               </button>
+              </>)}
             </>
           )}
         </div>
